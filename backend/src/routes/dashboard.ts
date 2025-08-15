@@ -5,10 +5,14 @@ import { DashboardData, Analytics } from '../types/index.js';
 const dashboardRouter = Router();
 
 // Create a global project manager instance (in production, this would be injected)
-let projectManagerInstance: ProjectManager;
+let projectManagerInstance: ProjectManager | undefined;
 
 export function setProjectManager(pm: ProjectManager) {
   projectManagerInstance = pm;
+}
+
+export function getProjectManager(): ProjectManager | undefined {
+  return projectManagerInstance;
 }
 
 export { dashboardRouter };
@@ -21,26 +25,26 @@ dashboardRouter.get('/overview', async (req, res) => {
     }
 
     const currentWeek = getCurrentWeek();
-    const analytics = generateAnalytics(projectManagerInstance, currentWeek);
-    const recentUpdates = projectManagerInstance.getUpdates()
+    const analytics = generateAnalytics(projectManagerInstance as ProjectManager, currentWeek);
+    const recentUpdates = (projectManagerInstance as ProjectManager).getUpdates()
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 10);
     
-    const activeProjects = projectManagerInstance.getProjects()
+    const activeProjects = (projectManagerInstance as ProjectManager).getProjects()
       .filter(p => p.status === 'active')
       .slice(0, 10);
 
-    const upcomingDeadlines = projectManagerInstance.getTasks()
+    const upcomingDeadlines = (projectManagerInstance as ProjectManager).getTasks()
       .filter(t => t.dueDate && t.status !== 'completed')
       .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
       .slice(0, 10);
 
-    const employees = projectManagerInstance.getEmployees();
+    const employees = (projectManagerInstance as ProjectManager).getEmployees();
     const employeeStats = employees.map(employee => {
-      const stats = projectManagerInstance.getEmployeeStats(employee.id);
+      const stats = (projectManagerInstance as ProjectManager).getEmployeeStats(employee.id);
       return {
         employee,
-        lastUpdate: getLastUpdateDate(employee.id, projectManagerInstance),
+        lastUpdate: getLastUpdateDate(employee.id, projectManagerInstance as ProjectManager),
         tasksCompleted: stats.completed,
         tasksInProgress: stats.inProgress,
         tasksBlocked: stats.blocked
@@ -64,6 +68,20 @@ dashboardRouter.get('/overview', async (req, res) => {
   }
 });
 
+// Debug endpoint to inspect server-side state
+dashboardRouter.get('/debug', (req, res) => {
+  try {
+    if (!projectManagerInstance) {
+      return res.status(200).json({ ok: false, message: 'Project manager not initialized' });
+    }
+    const summary = projectManagerInstance.getStateSummary();
+    return res.json({ ok: true, summary });
+  } catch (e) {
+    console.error('[DASHBOARD] /debug failed:', e);
+    return res.status(500).json({ ok: false, error: 'debug_failed' });
+  }
+});
+
 // Projects endpoint
 dashboardRouter.get('/projects', async (req, res) => {
   try {
@@ -71,10 +89,11 @@ dashboardRouter.get('/projects', async (req, res) => {
       return res.status(500).json({ error: 'Project manager not initialized' });
     }
 
-    const projects = projectManagerInstance.getProjects();
+    const pm = projectManagerInstance as ProjectManager;
+    const projects = pm.getProjects();
     const projectsWithStats = projects.map(project => ({
       ...project,
-      stats: projectManagerInstance.getProjectStats(project.id)
+      stats: pm.getProjectStats(project.id)
     }));
 
     res.json(projectsWithStats);
@@ -92,11 +111,12 @@ dashboardRouter.get('/employees', async (req, res) => {
       return res.status(500).json({ error: 'Project manager not initialized' });
     }
 
-    const employees = projectManagerInstance.getEmployees();
+    const pm = projectManagerInstance as ProjectManager;
+    const employees = pm.getEmployees();
     const employeesWithStats = employees.map(employee => ({
       ...employee,
-      stats: projectManagerInstance.getEmployeeStats(employee.id),
-      lastUpdate: getLastUpdateDate(employee.id, projectManagerInstance)
+      stats: pm.getEmployeeStats(employee.id),
+      lastUpdate: getLastUpdateDate(employee.id, pm)
     }));
 
     res.json(employeesWithStats);
@@ -115,7 +135,8 @@ dashboardRouter.get('/tasks', async (req, res) => {
     }
 
     const { status, employeeId, projectId, priority } = req.query;
-    let tasks = projectManagerInstance.getTasks();
+    const pm = projectManagerInstance as ProjectManager;
+    let tasks = pm.getTasks();
 
     // Apply filters
     if (status) {
@@ -181,8 +202,9 @@ dashboardRouter.get('/analytics/:weekOf', async (req, res) => {
       return res.status(500).json({ error: 'Project manager not initialized' });
     }
 
+    const pm = projectManagerInstance as ProjectManager;
     const weekOf = req.params.weekOf;
-    const analytics = generateAnalytics(projectManagerInstance, weekOf);
+    const analytics = generateAnalytics(pm, weekOf);
 
     res.json(analytics);
 
@@ -199,8 +221,9 @@ dashboardRouter.get('/analytics', async (req, res) => {
       return res.status(500).json({ error: 'Project manager not initialized' });
     }
 
+    const pm = projectManagerInstance as ProjectManager;
     const weekOf = getCurrentWeek();
-    const analytics = generateAnalytics(projectManagerInstance, weekOf);
+    const analytics = generateAnalytics(pm, weekOf);
 
     res.json(analytics);
 

@@ -1,19 +1,31 @@
 ﻿import { Router } from 'express'
 import multer from 'multer'
 import { ProjectManager } from '../services/projectManager.js'
+import { getProjectManager } from './dashboard.js'
 import { ChatMessenger } from '../services/chatMessenger.js'
 import type { ProcessUpdateRequest } from '../types/index.js'
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024, files: 10 } })
-const projectManager = new ProjectManager()
+// Lazily resolve the shared ProjectManager on each request to avoid capturing
+// a separate instance during module load order.
+let fallbackPM: ProjectManager | undefined
+function resolveProjectManager(): ProjectManager {
+  const shared = getProjectManager?.()
+  if (shared) return shared
+  if (!fallbackPM) fallbackPM = new ProjectManager()
+  return fallbackPM
+}
 const chatMessenger = new ChatMessenger()
 
 export const inboundRouter = Router()
 
 inboundRouter.post('/webhook', upload.any(), async (req, res) => {
+  const projectManager = resolveProjectManager()
+  console.log('[INBOUND] Using ProjectManager instance:', (projectManager as any)?.instanceId)
   const tokenHeaderName = process.env.INBOUND_HEADER_NAME || 'X-Webhook-Token'
   const configuredToken = process.env.INBOUND_TOKEN
   const received = (req.headers[tokenHeaderName.toLowerCase()] as string) || ''
+  console.log('[INBOUND] Auth check:', { tokenHeaderName, hasConfigured: !!configuredToken, receivedLen: received.length })
   
   if (!configuredToken) return res.status(500).json({ error: 'INBOUND_TOKEN not configured' })
   if (received !== configuredToken) return res.status(401).json({ error: 'Invalid token' })

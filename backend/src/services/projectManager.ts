@@ -1,17 +1,34 @@
 import { Employee, Project, Task, WeeklyUpdate, ProcessUpdateRequest, ProcessUpdateResponse } from '../types/index.js';
+import { Firestore } from '@google-cloud/firestore';
 import { GeminiNLP } from './geminiNLP.js';
 
 export class ProjectManager {
+  public readonly instanceId: string;
   // In-memory storage for MVP (will be replaced with Firestore)
   private employees: Map<string, Employee> = new Map();
   private projects: Map<string, Project> = new Map();
   private tasks: Map<string, Task> = new Map();
   private updates: Map<string, WeeklyUpdate> = new Map();
   private geminiNLP: GeminiNLP;
+  private db: Firestore | null = null;
 
   constructor() {
+    this.instanceId = 'pm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
     this.initializeDefaultProjects();
     this.geminiNLP = new GeminiNLP();
+    // Initialize Firestore if available
+    try {
+      const projectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT;
+      this.db = new Firestore({ projectId });
+      console.log('[PROJECT_MANAGER] Firestore initialized for project:', projectId || 'default env');
+      // Load existing data from Firestore
+      this.loadDataFromFirestore().catch(err => {
+        console.warn('[PROJECT_MANAGER] Failed to load data from Firestore:', err);
+      });
+    } catch (e) {
+      console.warn('[PROJECT_MANAGER] Firestore not initialized, using in-memory store only');
+    }
+    console.log(`[PROJECT_MANAGER] Constructed instance ${this.instanceId}`);
   }
 
   private initializeDefaultProjects() {
@@ -103,6 +120,17 @@ export class ProjectManager {
 
       update.projects = assignedProjects;
       this.updates.set(update.id, update);
+      // Persist to Firestore if available (best-effort)
+      if (this.db) {
+        try {
+          await this.db.collection('updates').doc(update.id).set(update);
+          for (const task of extractedTasks) {
+            await this.db.collection('tasks').doc(task.id).set(task);
+          }
+        } catch (persistErr) {
+          console.warn('[PROJECT_MANAGER] Firestore persist failed:', persistErr);
+        }
+      }
 
       // Update employee's last update time
       employee.lastUpdateAt = new Date().toISOString();
@@ -138,14 +166,33 @@ export class ProjectManager {
         displayName: employeeData.displayName,
         isActive: true,
         createdAt: new Date().toISOString(),
+        lastUpdateAt: new Date().toISOString(),
       };
       this.employees.set(employee.id, employee);
       console.log(`Created new employee: ${employee.displayName} (${employee.email})`);
+      
+      // Persist to Firestore
+      if (this.db) {
+        try {
+          await this.db.collection('employees').doc(employee.id).set(employee);
+        } catch (persistErr) {
+          console.warn('[PROJECT_MANAGER] Failed to persist employee to Firestore:', persistErr);
+        }
+      }
     } else {
       // Update display name if it changed
       if (employee.displayName !== employeeData.displayName) {
         employee.displayName = employeeData.displayName;
         this.employees.set(employee.id, employee);
+        
+        // Update in Firestore
+        if (this.db) {
+          try {
+            await this.db.collection('employees').doc(employee.id).set(employee);
+          } catch (persistErr) {
+            console.warn('[PROJECT_MANAGER] Failed to update employee in Firestore:', persistErr);
+          }
+        }
       }
     }
     
@@ -329,6 +376,59 @@ export class ProjectManager {
     return message;
   }
 
+  // Firestore data loading methods
+  private async loadDataFromFirestore(): Promise<void> {
+    if (!this.db) {
+      console.log('[PROJECT_MANAGER] No Firestore connection, skipping data load');
+      return;
+    }
+
+    try {
+      console.log('[PROJECT_MANAGER] Loading data from Firestore...');
+      
+      // Load employees
+      const employeesSnapshot = await this.db.collection('employees').get();
+      employeesSnapshot.forEach((doc: any) => {
+        const employee = doc.data() as Employee;
+        this.employees.set(employee.id, employee);
+      });
+
+      // Load projects (but don't override default projects)
+      const projectsSnapshot = await this.db.collection('projects').get();
+      projectsSnapshot.forEach((doc: any) => {
+        const project = doc.data() as Project;
+        // Only add if it's not a default project
+        if (!['general', 'maintenance', 'development'].includes(project.id)) {
+          this.projects.set(project.id, project);
+        }
+      });
+
+      // Load tasks
+      const tasksSnapshot = await this.db.collection('tasks').get();
+      tasksSnapshot.forEach((doc: any) => {
+        const task = doc.data() as Task;
+        this.tasks.set(task.id, task);
+      });
+
+      // Load updates
+      const updatesSnapshot = await this.db.collection('updates').get();
+      updatesSnapshot.forEach((doc: any) => {
+        const update = doc.data() as WeeklyUpdate;
+        this.updates.set(update.id, update);
+      });
+
+      console.log('[PROJECT_MANAGER] Loaded from Firestore:', {
+        employees: this.employees.size,
+        projects: this.projects.size,
+        tasks: this.tasks.size,
+        updates: this.updates.size
+      });
+
+    } catch (error) {
+      console.error('[PROJECT_MANAGER] Error loading data from Firestore:', error);
+    }
+  }
+
   // Utility methods
   private generateUpdateId(): string {
     return 'update_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -377,6 +477,21 @@ export class ProjectManager {
       completed: tasks.filter(t => t.status === 'completed').length,
       inProgress: tasks.filter(t => t.status === 'in-progress').length,
       blocked: tasks.filter(t => t.status === 'blocked').length,
+    };
+  }
+
+  public getStateSummary() {
+    return {
+      instanceId: this.instanceId,
+      counts: {
+        employees: this.employees.size,
+        projects: this.projects.size,
+        tasks: this.tasks.size,
+        updates: this.updates.size,
+      },
+      sample: {
+        latestUpdate: Array.from(this.updates.values()).sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime())[0],
+      }
     };
   }
 }

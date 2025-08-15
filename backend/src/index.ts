@@ -26,7 +26,7 @@ let projectManager: ProjectManager;
 try {
   projectManager = new ProjectManager();
   setProjectManager(projectManager);
-  console.log('[project-manager] Initialized with Gemini NLP');
+  console.log('[project-manager] Initialized with Gemini NLP', { instanceId: (projectManager as any).instanceId });
 } catch (error) {
   console.error('[project-manager] Failed to initialize:', error);
   console.log('[project-manager] Check GEMINI_API_KEY environment variable');

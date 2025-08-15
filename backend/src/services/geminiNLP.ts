@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Task } from '../types/index.js';
+import { TaskExtractor } from './taskExtractor.js';
 
 export class GeminiNLP {
   private genAI: GoogleGenerativeAI | null = null;
@@ -286,34 +287,36 @@ Respond in one of these formats:
 
   // Fallback methods for when Gemini is unavailable
   private fallbackTaskExtraction(messageText: string, employeeId: string): Task[] {
-    console.log('[GEMINI] Using fallback task extraction');
-    
-    // Simple pattern-based extraction as fallback
-    const sentences = messageText.split(/[.!?]+/).filter(s => s.trim().length > 10);
-    const tasks: Task[] = [];
-    
-    for (const sentence of sentences) {
-      const trimmed = sentence.trim();
-      if (this.looksLikeTask(trimmed)) {
-        tasks.push({
-          id: this.generateTaskId(),
-          employeeId,
-          title: trimmed.slice(0, 100),
-          description: trimmed,
-          status: this.inferStatusFromText(trimmed),
-          priority: 'medium',
-          tags: [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
+    console.log('[GEMINI] Using fallback task extraction (TaskExtractor)');
+    try {
+      const tasks = TaskExtractor.extractTasks(messageText, employeeId);
+      return tasks;
+    } catch (e) {
+      console.warn('[GEMINI] TaskExtractor failed, using minimal keyword heuristic');
+      const sentences = messageText.split(/[.!?]+/).filter(s => s.trim().length > 3);
+      const tasks: Task[] = [];
+      for (const sentence of sentences) {
+        const trimmed = sentence.trim();
+        if (this.looksLikeTask(trimmed)) {
+          tasks.push({
+            id: this.generateTaskId(),
+            employeeId,
+            title: trimmed.slice(0, 100),
+            description: trimmed,
+            status: this.inferStatusFromText(trimmed),
+            priority: 'medium',
+            tags: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+        }
       }
+      return tasks;
     }
-    
-    return tasks;
   }
 
   private looksLikeTask(text: string): boolean {
-    const taskKeywords = ['completed', 'working on', 'finished', 'started', 'will', 'need to', 'planning'];
+    const taskKeywords = ['completed', 'working on', 'worked on', 'finishing', 'finished', 'started', 'starting', 'will', 'need to', 'planning', 'plan to', 'next week'];
     const lowerText = text.toLowerCase();
     return taskKeywords.some(keyword => lowerText.includes(keyword));
   }

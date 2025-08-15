@@ -1,0 +1,10 @@
+﻿runtime: nodejs20
+
+env_variables:
+  NODE_ENV: production
+  INBOUND_TOKEN: iD0NEkwszZwcR9EajFjpEzl4BsMD9QVJ
+  CHAT_VERIFICATION_TOKEN: dwwh8zxc1JIQ53fqhJKdyMjiXy5zJYai
+
+automatic_scaling:
+  min_instances: 0
+  max_instances: 10
