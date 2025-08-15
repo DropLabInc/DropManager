@@ -1,38 +1,193 @@
-﻿# Google Chat Weekly Status Bot
+﻿# DropManager Chat Bot
 
-Automation-first weekly status collection via Google Chat with dashboard and overrides.
+A comprehensive Google Chat bot system for weekly task updates, logging, analysis, and project management. The system consists of a Google Apps Script frontend that handles Chat interactions and a Node.js backend deployed on Google Cloud Run for processing and storage.
 
-## Backend quick start
+## 🏗️ Architecture
 
-`ash
+```
+Google Chat → Apps Script → Cloud Run Backend → Google Sheets
+                ↓
+            File Processing (Images/Attachments)
+```
+
+## ✨ Features
+
+- **📝 Message Processing**: Handles text messages and image attachments from Google Chat
+- **📊 Google Sheets Integration**: Automatically logs all updates to a spreadsheet
+- **🖼️ Image Support**: Downloads and processes images from Chat and Google Drive
+- **🔐 Secure Webhooks**: Token-based authentication between components
+- **📈 Scalable Backend**: Cloud Run deployment with automatic scaling
+- **🔍 Verbose Logging**: Comprehensive debugging and monitoring
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Google Cloud Platform account with billing enabled
+- Google Apps Script access
+- Google Chat API enabled
+
+### 1. Backend Deployment
+
+```bash
+# Install dependencies
 cd backend
-cp .env.example .env
 npm install
+
+# Local development
 npm run dev
-`
+# Health check: http://localhost:3000/healthz
 
-Expose http://localhost:8080/chat/events to the internet (e.g., ngrok) and set the same token in your Google Chat app and .env as CHAT_VERIFICATION_TOKEN.
+# Deploy to Cloud Run
+cd ..
+gcloud builds submit --tag us-central1-docker.pkg.dev/YOUR_PROJECT_ID/chat-backend/backend:latest backend
+gcloud run deploy chat-status-backend --image us-central1-docker.pkg.dev/YOUR_PROJECT_ID/chat-backend/backend:latest --region us-central1
+```
 
-## Health check
-- GET http://localhost:8080/healthz  { ok: true }
+### 2. Apps Script Setup
 
-## Chat webhook (MVP)
-- POST http://localhost:8080/chat/events with header X-Goog-Chat-Bot-Token: <token> and JSON body; server echoes Thanks! Update received. and stores payload in memory.
+1. Go to [Google Apps Script](https://script.google.com)
+2. Create a new project
+3. Copy `apps_script/Code.gs` and `apps_script/appsscript.json`
+4. Set Script Properties:
+   ```
+   OUTBOUND_URL: https://your-cloud-run-url/inbound/webhook
+   OUTBOUND_TOKEN: your-secret-token
+   ```
+5. Deploy as Web App (Execute as: Me, Access: Anyone)
 
-See PROJECT_OUTLINE.txt for milestones.
-\n## Cloud Run deployment
-1) Build & push (Artifact Registry or gcloud build):
-`ash
-gcloud builds submit --tag gcr.io/PROJECT_ID/chat-status-backend
-`
-2) Deploy:
-`ash
-gcloud run deploy chat-status-backend --image gcr.io/PROJECT_ID/chat-status-backend --region REGION --allow-unauthenticated
-`
-3) Configure env vars:
-- INBOUND_TOKEN (required)
-- INBOUND_HEADER_NAME (optional, defaults X-Webhook-Token)
-4) Apps Script script properties:
-- OUTBOUND_URL: https://<cloud-run-url>/inbound/webhook
-- OUTBOUND_HEADER_NAME: X-Webhook-Token
-- OUTBOUND_TOKEN: same as INBOUND_TOKEN
+### 3. Google Chat App Configuration
+
+1. Create a Chat app in Google Cloud Console
+2. Set the HTTP endpoint to your Apps Script Web App URL
+3. Enable necessary scopes and permissions
+
+## 🔧 Configuration
+
+### Environment Variables (Cloud Run)
+
+```bash
+PORT=8080
+NODE_ENV=production
+CHAT_VERIFICATION_TOKEN=your-chat-token
+CRON_TOKEN=your-cron-token
+INBOUND_TOKEN=your-webhook-token
+INBOUND_HEADER_NAME=X-Webhook-Token
+```
+
+### Apps Script Properties
+
+```
+OUTBOUND_URL=https://your-cloud-run-url/inbound/webhook
+OUTBOUND_HEADER_NAME=X-Webhook-Token
+OUTBOUND_TOKEN=your-webhook-token
+```
+
+## 📡 API Endpoints
+
+### Backend Routes
+
+- `GET /healthz` - Health check
+- `POST /inbound/webhook` - Receives data from Apps Script
+- `POST /chat/events` - Google Chat webhook (legacy)
+- `POST /cron/weekly-reminders` - Scheduled reminders
+- `POST /cron/escalations` - Task escalations
+- `GET /admin/health` - Admin health check
+
+## 🔍 Testing
+
+### Test Chat Integration
+
+1. Send a message to your Chat bot
+2. Check Cloud Run logs:
+   ```bash
+   gcloud run services logs read chat-status-backend --region=us-central1 --limit=10
+   ```
+3. Verify Google Sheets logging
+
+### Test with Images
+
+1. Send a message with an image attachment
+2. Monitor Apps Script executions for verbose logging
+3. Confirm image data reaches Cloud Run backend
+
+## 📋 OAuth Scopes Required
+
+Apps Script requires these scopes in `appsscript.json`:
+
+```json
+{
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/drive.readonly",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/chat.messages"
+  ]
+}
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **403 Permission Denied (Images)**
+   - Ensure `chat.messages` scope is in `appsscript.json`
+   - Re-authorize the Apps Script after scope changes
+   - Run `manualAuth()` function in Apps Script editor
+
+2. **Backend Not Receiving Requests**
+   - Verify `OUTBOUND_URL` in Apps Script properties
+   - Check `INBOUND_TOKEN` matches on both sides
+   - Monitor Cloud Run logs for incoming requests
+
+3. **Sheets Not Updating**
+   - Check `spreadsheets` scope is included
+   - Verify Apps Script has permission to create/write sheets
+   - Look for sheet creation logs in Apps Script executions
+
+### Debugging
+
+- **Apps Script**: Check Executions tab for detailed logs
+- **Cloud Run**: Use `gcloud run services logs read` command
+- **Google Sheets**: Check for "DropManager Updates" spreadsheet in Drive
+
+## 📚 Project Structure
+
+```
+DropManager/
+├── apps_script/
+│   ├── Code.gs              # Main Apps Script logic
+│   ├── appsscript.json      # OAuth scopes and config
+│   └── README.md            # Apps Script documentation
+├── backend/
+│   ├── src/
+│   │   ├── routes/          # API endpoints
+│   │   ├── middleware/      # Authentication middleware
+│   │   ├── store/           # Data storage (memory-based MVP)
+│   │   └── utils/           # Utility functions
+│   ├── Dockerfile           # Container configuration
+│   ├── package.json         # Node.js dependencies
+│   └── tsconfig.json        # TypeScript configuration
+├── PROJECT_OUTLINE.txt      # Detailed project plan
+└── README.md               # This file
+```
+
+## 🎯 Current Status
+
+✅ **Completed Features:**
+- Google Chat message handling
+- Image attachment processing
+- Cloud Run backend deployment
+- Google Sheets integration
+- Secure webhook communication
+- Comprehensive logging and debugging
+
+🚧 **Next Steps:**
+- Implement reminder scheduling
+- Add Firestore for persistent storage
+- Build project management dashboard
+- Add task categorization and analysis
+
+## 📝 License
+
+This project is part of a task management system for employee weekly updates.

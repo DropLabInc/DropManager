@@ -6,6 +6,9 @@
 
 const MAX_SNIPPET = 400;
 
+// Global variable to store backend response
+var lastBackendResponse = null;
+
 // Web App HTTP endpoint (for Google Chat HTTP bot configuration)
 function doPost(e) {
   console.log('[DEBUG] doPost called with:', JSON.stringify(e, null, 2));
@@ -127,11 +130,18 @@ function onMessage(event) {
       // Don't fail the whole operation for sheets logging
     }
 
-    // Respond to user
-    var msg = files.length 
-      ? senderName + ', sent ' + files.length + ' image' + (files.length > 1 ? 's' : '') + ' and text to backend.'
-      : senderName + ', sent your message to backend.';
-    console.log('[DEBUG] Returning reply:', msg);
+    // Check if backend provided a formatted response
+    console.log('[DEBUG] About to check for backend response...');
+    var backendResponse = checkBackendResponse_();
+    if (backendResponse) {
+      console.log('[DEBUG] ✅ SUCCESS: Using backend-generated response');
+      return backendResponse;
+    }
+    
+    // Fallback to local smart reply
+    console.log('[DEBUG] ❌ FALLBACK: No backend response found, using local reply');
+    var msg = generateSmartReply_(senderName, files.length, text);
+    console.log('[DEBUG] Returning local fallback reply:', msg);
     return chatReply_(msg);
 
   } catch (err) {
@@ -358,6 +368,22 @@ function sendToBackend_(payload) {
       throw new Error('Backend webhook error ' + code + ': ' + text);
     }
     
+    // Try to parse backend response for Chat formatting
+    try {
+      var backendData = JSON.parse(responseText);
+      console.log('[DEBUG] Parsed backend data:', JSON.stringify(backendData, null, 2));
+      
+      if (backendData.text || backendData.cardsV2) {
+        console.log('[DEBUG] Backend provided Chat response format');
+        lastBackendResponse = backendData;
+      } else {
+        console.log('[DEBUG] Backend response structure:', Object.keys(backendData));
+      }
+    } catch (parseErr) {
+      console.log('[DEBUG] Backend response not JSON or not Chat format:', parseErr);
+      console.log('[DEBUG] Raw response text:', responseText.slice(0, 200));
+    }
+    
     console.log('[DEBUG] Backend request successful');
   } catch (backendErr) {
     console.error('[ERROR] Backend request failed:', backendErr);
@@ -375,6 +401,47 @@ function chatReply_(text) {
       }
     }
   };
+}
+
+function generateSmartReply_(senderName, fileCount, messageText) {
+  console.log('[DEBUG] Generating LOCAL FALLBACK reply for:', senderName, 'files:', fileCount);
+  
+  // Make it very obvious this is the local fallback response
+  var reply = '🤖 BEEPBEEPBOOP! Local Apps Script fallback response.\n\n';
+  reply += 'This means the server response was not detected. ';
+  reply += 'Files: ' + fileCount + ', Message length: ' + messageText.length + ' chars.\n\n';
+  reply += 'If you see this message, the backend response parsing failed.';
+  
+  return reply;
+}
+
+function checkBackendResponse_() {
+  console.log('[DEBUG] Checking for backend response...');
+  console.log('[DEBUG] lastBackendResponse value:', lastBackendResponse);
+  console.log('[DEBUG] lastBackendResponse type:', typeof lastBackendResponse);
+  
+  if (lastBackendResponse) {
+    console.log('[DEBUG] ✅ Found backend response:', JSON.stringify(lastBackendResponse, null, 2));
+    var response = lastBackendResponse;
+    lastBackendResponse = null; // Clear it after use
+    
+    // Convert backend response to Apps Script Chat response format
+    if (response.cardsV2) {
+      console.log('[DEBUG] Using card response format');
+      return {
+        cardsV2: response.cardsV2
+      };
+    } else if (response.text) {
+      console.log('[DEBUG] Using text response format:', response.text);
+      return chatReply_(response.text);
+    } else {
+      console.log('[DEBUG] Backend response has no text or cardsV2 property');
+      console.log('[DEBUG] Available properties:', Object.keys(response));
+    }
+  }
+  
+  console.log('[DEBUG] ❌ No backend response found - will use fallback');
+  return null;
 }
 
 // Google Sheets logging for audit trail
