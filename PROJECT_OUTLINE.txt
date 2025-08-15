@@ -1,0 +1,460 @@
+================================================================================
+GOOGLE CHAT WEEKLY STATUS BOT - PROJECT OUTLINE
+================================================================================
+
+PROJECT OVERVIEW
+================================================================================
+Build a fully automated Google Chat-based weekly status collection system that:
+- Automatically onboards employees and tracks their weekly updates
+- Uses AI/ML to classify updates by project with minimal human intervention
+- Proactively reminds employees and escalates to managers when needed
+- Provides real-time dashboard visibility into team activity and project health
+- Allows controlled manual overrides without disrupting automation
+
+CORE PRINCIPLE: Automation-first with human override capability
+- Default behavior is fully automated end-to-end
+- Every automated decision can be inspected and overridden by authorized users
+- Overrides are audit-logged and feed back into the learning system
+- Manual intervention is the exception, not the rule
+
+GOALS
+================================================================================
+✓ Zero-manual intake: Employees simply DM the bot their updates
+✓ Automated accountability: Timezone-aware reminders and escalations
+✓ Automated organization: AI-powered project classification with confidence scoring
+✓ Automated visibility: Live dashboard with metrics, trends, and exports
+✓ Controlled overrides: Managers can correct misclassifications and tune settings
+
+NON-GOALS (Initial Phase)
+================================================================================
+✗ Cross-platform support beyond Google Chat
+✗ Manual tagging as part of normal workflow
+✗ Complex project management features (Gantt charts, sprint planning)
+✗ Performance review integration
+✗ Deep HR workflows
+
+TARGET USERS & CORE FLOWS
+================================================================================
+
+EMPLOYEES:
+- Receive automated weekly reminder DMs
+- Send free-form status updates via Chat
+- Get automatic confirmation and parsed summary
+- No manual categorization required
+
+MANAGERS:
+- View team/project health on dashboard
+- Override AI classifications when incorrect
+- Export reports and track trends
+- Receive automated escalation summaries
+
+ADMINS:
+- Configure automation policies and thresholds
+- Manage project definitions and mappings
+- Tune AI classification accuracy
+- Monitor system health and performance
+
+AUTOMATED WORKFLOWS:
+1. Employee onboarding via Google Workspace Directory sync
+2. Weekly reminder scheduling based on employee timezones
+3. Update intake, parsing, and automatic project classification
+4. Escalation handling for non-responsive employees
+5. Dashboard metric computation and refresh
+
+TECHNICAL ARCHITECTURE
+================================================================================
+
+CORE COMPONENTS:
+- Google Chat Bot: Message handling, DM sending, card interactions
+- Backend Service (Cloud Run): API endpoints, business logic, ML processing
+- Database (Firestore/Cloud SQL): Employee data, updates, projects, audit logs
+- ML Pipeline (Vertex AI): Text classification, sentiment analysis, learning
+- Dashboard (React/Next.js): Manager/admin interface with Google OAuth
+- Scheduler (Cloud Scheduler + Tasks): Reminder cadence and escalations
+
+TECHNOLOGY STACK:
+- Runtime: Node.js or Python
+- Hosting: Google Cloud Platform (Cloud Run)
+- Database: Firestore (MVP) or Cloud SQL PostgreSQL (analytics-heavy)
+- ML/AI: Vertex AI for text classification and embeddings
+- Frontend: React/Next.js with Google OAuth integration
+- Scheduling: Cloud Scheduler + Cloud Tasks/Pub/Sub
+
+DATA MODEL
+================================================================================
+
+EMPLOYEE:
+- employeeId, email, displayName, chatUserId
+- managerEmail, teamId, timezone, isActive, isExcluded
+- lastUpdateDate, reminderPreferences
+
+PROJECT:
+- projectId, name, description, status, ownerEmail
+- tags[], keywords[], externalRefs[] (Jira, GitHub, etc.)
+- isActive, priority, lastActivityDate
+
+UPDATE:
+- updateId, employeeId, submittedAt, weekOf, rawText
+- parsedSections: {completed[], inProgress[], blockers[], next[]}
+- assignedProjects[], confidence, sentiment
+- isManuallyReviewed, reviewedBy, reviewedAt
+
+REMINDER:
+- reminderId, employeeId, scheduledFor, sentAt, type
+- status (pending/sent/delivered/failed), attempts, response
+
+AUTOMATION_POLICY:
+- reminderCadence, escalationRules, classificationThresholds
+- timezoneHandling, excludedDates, managerSummarySettings
+
+OVERRIDE:
+- overrideId, targetType, targetId, field, oldValue, newValue
+- actor, reason, createdAt, confidence (for ML feedback)
+
+AUDIT_LOG:
+- logId, actor, action, target, metadata, timestamp
+
+AUTOMATION DETAILS
+================================================================================
+
+DIRECTORY SYNC:
+- Nightly sync from Google Workspace Directory API
+- Auto-create employee records with manager hierarchy
+- Detect timezone, team, and organizational changes
+- Handle new hires and departures automatically
+
+REMINDER ENGINE:
+- Timezone-aware weekly scheduling (Monday morning local time)
+- Second nudge after 48 hours if no response
+- Friday manager summary for non-responsive team members
+- Holiday and PTO calendar integration
+
+AUTO CLASSIFICATION:
+Phase 1: Rule-based + keyword matching + embeddings similarity
+Phase 2: Vertex AI text classifier with confidence scoring
+- Auto-apply classifications above 85% confidence
+- Queue for review between 60-85% confidence
+- Flag for manual review below 60% confidence
+- Continuous learning from override feedback
+
+UPDATE PARSING:
+- Extract structured data from free-form text
+- Identify: completed tasks, in-progress work, blockers, next steps
+- Sentiment analysis for team health monitoring
+- Project keyword extraction and matching
+
+DASHBOARD FEATURES
+================================================================================
+
+MANAGER VIEWS:
+- Team overview: submission rates, on-time percentages, trends
+- Project health: activity levels, blocker identification, sentiment
+- Individual employee drill-downs with update history
+- Export capabilities (CSV, PDF reports)
+
+ADMIN CONTROLS:
+- Project management: create, merge, rename, archive projects
+- Employee management: mappings, exclusions, timezone corrections
+- Classification tuning: review confidence thresholds, retrain models
+- Policy configuration: reminder cadence, escalation rules
+
+OVERRIDE CAPABILITIES:
+- Reclassify updates to different projects
+- Edit parsed sections (completed/blockers/next)
+- Adjust employee-project mappings
+- Mark weeks as excused or on PTO
+- Bulk operations for historical corrections
+
+API ENDPOINTS
+================================================================================
+
+CHAT INTEGRATION:
+POST /chat/events - Handle incoming Chat messages and events
+POST /chat/send - Send proactive messages and reminders
+
+DASHBOARD API:
+GET /dashboard/metrics - Team and project KPIs with date ranges
+GET /dashboard/updates - Filtered update feed with pagination
+GET /dashboard/employees/{id} - Individual employee details and history
+GET /dashboard/projects/{id} - Project activity and team assignments
+
+ADMIN API:
+GET/POST /admin/employees - Employee management and bulk operations
+GET/POST /admin/projects - Project definitions and configurations
+GET/POST /admin/policies - Automation policy management
+POST /admin/sync-directory - On-demand directory synchronization
+POST /admin/reclassify - Bulk reclassification operations
+GET /admin/overrides - Audit trail of manual interventions
+
+SCHEDULER ENDPOINTS:
+POST /cron/weekly-reminders - Triggered by Cloud Scheduler
+POST /cron/escalations - Handle overdue responses
+POST /cron/metrics-refresh - Update dashboard calculations
+
+SECURITY & COMPLIANCE
+================================================================================
+
+AUTHENTICATION & AUTHORIZATION:
+- Google Chat request signature verification
+- Google OAuth integration for dashboard access
+- Role-based access control (employee/manager/admin)
+- Service account least-privilege permissions
+
+DATA PROTECTION:
+- Encryption in transit (HTTPS) and at rest (Cloud KMS)
+- PII minimization and configurable retention policies
+- Right-to-erasure support for GDPR compliance
+- Audit logging for all administrative actions
+
+PRIVACY CONSIDERATIONS:
+- Message content retention policies
+- Manager access scoped to direct reports only
+- Anonymized analytics and trend reporting
+- Opt-out mechanisms for sensitive updates
+
+SUCCESS METRICS
+================================================================================
+
+OPERATIONAL KPIs:
+- Weekly submission rate ≥ 90% after 4-week adoption period
+- On-time submission rate ≥ 80% (before reminder deadline)
+- Automated classification accuracy ≥ 85% (manager override rate ≤ 15%)
+- System availability ≥ 99.9% during business hours
+
+PERFORMANCE METRICS:
+- p95 message processing latency < 3 seconds
+- Reminder delivery failure rate < 1%
+- Dashboard load time < 2 seconds
+- ML classification response time < 500ms
+
+USER SATISFACTION:
+- Manager satisfaction score ≥ 4/5 in quarterly surveys
+- Employee friction score ≤ 2/5 (ease of use)
+- Admin efficiency improvement ≥ 50% vs manual processes
+
+DEVELOPMENT MILESTONES
+================================================================================
+
+WEEK 1 - FOUNDATION & SETUP
+Deliverables:
+- GCP project provisioning with proper IAM setup
+- Google Chat app registration and webhook configuration
+- Repository scaffolding with CI/CD pipeline to Cloud Run
+- Basic health endpoints and request verification
+- Development, staging, and production environments
+
+Acceptance Criteria:
+- Health endpoint responds successfully
+- Chat app receives and verifies webhook events
+- Deployment pipeline deploys to all environments
+
+WEEK 2 - BASIC INTAKE MVP
+Deliverables:
+- Handle incoming Chat messages and store raw updates
+- Basic employee and update data models
+- Simple acknowledgment flow with confirmation messages
+- Minimal dashboard skeleton with authentication
+- Basic update listing functionality
+
+Acceptance Criteria:
+- Send message to bot, receive confirmation
+- Update appears in dashboard within 5 seconds
+- Google OAuth login works for dashboard
+
+WEEK 3 - AUTOMATED EMPLOYEE MANAGEMENT
+Deliverables:
+- Google Workspace Directory API integration
+- Automated employee onboarding and sync
+- Timezone detection and handling
+- Manager hierarchy mapping
+- Employee status management (active/inactive)
+
+Acceptance Criteria:
+- New employees automatically appear after directory sync
+- Timezone information correctly populated
+- Manager relationships properly established
+
+WEEK 4 - REMINDER ENGINE & SCHEDULING
+Deliverables:
+- Cloud Scheduler integration for weekly reminders
+- Timezone-aware reminder scheduling
+- Escalation logic for non-responsive employees
+- Manager summary generation and delivery
+- Reminder status tracking and retry logic
+
+Acceptance Criteria:
+- Employees receive reminders at correct local times
+- Non-responsive employees get follow-up nudges
+- Managers receive weekly summary of team status
+
+WEEK 5 - AUTO CLASSIFICATION V1
+Deliverables:
+- Rule-based project classification system
+- Keyword and tag matching algorithms
+- Confidence scoring for classifications
+- Basic override functionality in dashboard
+- Classification accuracy metrics
+
+Acceptance Criteria:
+- Updates automatically assigned to projects with ≥70% accuracy
+- Admins can override classifications through dashboard
+- Classification confidence scores displayed
+
+WEEK 6 - DASHBOARD POLISH & REPORTING
+Deliverables:
+- Complete manager dashboard with filtering and search
+- Project and employee detail pages
+- Export functionality (CSV, PDF)
+- Trend charts and analytics
+- Mobile-responsive design
+
+Acceptance Criteria:
+- Managers can filter by date range, project, and employee
+- Export generates properly formatted reports
+- Dashboard loads in under 2 seconds
+
+WEEK 7 - ML INTEGRATION & LEARNING
+Deliverables:
+- Vertex AI text classification integration
+- Embedding-based similarity matching
+- Continuous learning from override feedback
+- Sentiment analysis for team health
+- Advanced analytics and insights
+
+Acceptance Criteria:
+- ML classification accuracy ≥85% on test dataset
+- Override feedback improves model performance
+- Sentiment trends visible in dashboard
+
+WEEK 8 - HARDENING & LAUNCH PREP
+Deliverables:
+- Comprehensive error handling and monitoring
+- Performance optimization and caching
+- Security audit and penetration testing
+- Load testing and scalability validation
+- User documentation and training materials
+
+Acceptance Criteria:
+- System handles 1000+ concurrent users
+- All security requirements met
+- Documentation complete for all user roles
+
+TESTING STRATEGY
+================================================================================
+
+UNIT TESTING:
+- Business logic: classification rules, parsing algorithms
+- Data models: validation, relationships, constraints
+- API endpoints: request/response handling, error cases
+- Utilities: timezone handling, text processing
+
+INTEGRATION TESTING:
+- Google Chat webhook end-to-end with signed requests
+- Directory API synchronization with mock responses
+- Database operations with test data
+- ML pipeline with sample classifications
+
+LOAD TESTING:
+- Reminder fan-out for 1000+ employees
+- Concurrent update processing during peak hours
+- Dashboard response times under load
+- Database query performance with large datasets
+
+USER ACCEPTANCE TESTING:
+- Pilot program with 20-30 employees across 3-5 projects
+- Manager feedback on dashboard usability
+- Admin testing of override and configuration features
+- End-to-end workflow validation
+
+DEPLOYMENT & ROLLOUT PLAN
+================================================================================
+
+PHASE 1 - PILOT (Weeks 9-10):
+- Deploy to staging environment
+- Onboard 20-30 volunteer employees
+- Monitor system performance and user feedback
+- Iterate on UX issues and classification accuracy
+
+PHASE 2 - DEPARTMENT ROLLOUT (Weeks 11-12):
+- Deploy to production environment
+- Rollout to engineering department (100-200 employees)
+- Monitor metrics and system stability
+- Refine automation policies based on usage patterns
+
+PHASE 3 - ORGANIZATION-WIDE (Weeks 13-16):
+- Gradual rollout to all departments
+- Monitor scaling and performance
+- Continuous improvement based on feedback
+- Documentation and training for all users
+
+RISK MITIGATION
+================================================================================
+
+TECHNICAL RISKS:
+- Google Chat API rate limiting → Implement exponential backoff and queuing
+- Classification accuracy too low → Fallback to rule-based system
+- Database performance issues → Optimize queries and add caching
+- Vertex AI service unavailable → Graceful degradation to simpler methods
+
+ADOPTION RISKS:
+- Low employee engagement → Gamification and manager enforcement
+- Manager resistance to automation → Pilot with enthusiastic early adopters
+- Privacy concerns → Transparent communication and opt-out mechanisms
+- Integration complexity → Phased rollout with extensive testing
+
+OPERATIONAL RISKS:
+- System downtime during business hours → Multi-region deployment
+- Data loss or corruption → Automated backups and point-in-time recovery
+- Security breach → Regular security audits and monitoring
+- Scaling bottlenecks → Load testing and performance monitoring
+
+FUTURE ENHANCEMENTS
+================================================================================
+
+PHASE 2 FEATURES:
+- Integration with project management tools (Jira, Asana, Monday.com)
+- Advanced analytics and predictive insights
+- Custom reminder cadences per team or project
+- Slack and Microsoft Teams integration
+- Mobile app for managers and admins
+
+ADVANCED CAPABILITIES:
+- Natural language querying of historical data
+- Automated project health scoring and alerts
+- Integration with performance review systems
+- Advanced sentiment analysis and team mood tracking
+- Automated project timeline estimation
+
+MACHINE LEARNING IMPROVEMENTS:
+- Multi-language support for global teams
+- Personalized classification models per employee
+- Anomaly detection for unusual patterns
+- Predictive modeling for project risks
+- Automated insights and recommendations
+
+BUDGET & RESOURCE ESTIMATES
+================================================================================
+
+DEVELOPMENT TEAM:
+- 1 Senior Full-stack Developer (8 weeks)
+- 1 ML/AI Engineer (4 weeks, part-time)
+- 1 DevOps Engineer (2 weeks, part-time)
+- 1 UX Designer (2 weeks, part-time)
+
+INFRASTRUCTURE COSTS (Monthly):
+- Cloud Run instances: $200-500
+- Firestore/Cloud SQL: $100-300
+- Vertex AI usage: $50-200
+- Cloud Scheduler/Tasks: $10-50
+- Monitoring and logging: $50-100
+- Total estimated: $410-1150/month
+
+ONGOING MAINTENANCE:
+- 20% developer time for bug fixes and minor features
+- Quarterly ML model retraining and optimization
+- Monthly security updates and dependency management
+- User support and training (initially higher, then stabilizes)
+
+================================================================================
+END OF PROJECT OUTLINE
+================================================================================

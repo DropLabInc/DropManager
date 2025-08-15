@@ -1,0 +1,19 @@
+﻿{
+  "timeZone": "America/New_York",
+  "dependencies": {},
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "addOns": {
+    "common": {
+      "name": "Chat App Quickstart",
+      "logoUrl": "https://developers.google.com/workspace/add-ons/images/quickstart-app-avatar.png"
+    },
+    "chat": {}
+  },
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/drive.readonly",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/chat.messages"
+  ]
+}
