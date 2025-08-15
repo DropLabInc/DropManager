@@ -1,0 +1,2 @@
+gcloud run deploy dropmanager --source . --platform managed --region us-central1 --allow-unauthenticated --set-env-vars "NODE_ENV=production,INBOUND_TOKEN=iD0NEkwszZwcR9EajFjpEzl4BsMD9QVJ,CHAT_VERIFICATION_TOKEN=dwwh8zxc1JIQ53fqhJKdyMjiXy5zJYai" --memory 512Mi --cpu 1 --min-instances 0 --max-instances 10 --timeout 300
+

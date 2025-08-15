@@ -20,34 +20,47 @@ export { dashboardRouter };
 // Dashboard overview endpoint
 dashboardRouter.get('/overview', async (req, res) => {
   try {
+    console.log('[DASHBOARD] /overview requested', { ts: new Date().toISOString() });
     if (!projectManagerInstance) {
       return res.status(500).json({ error: 'Project manager not initialized' });
     }
 
+    const pm = projectManagerInstance as ProjectManager;
+    const counts = {
+      updates: pm.getUpdates().length,
+      tasks: pm.getTasks().length,
+      projects: pm.getProjects().length,
+      employees: pm.getEmployees().length,
+    };
+    console.log('[DASHBOARD] State counts before analytics', counts);
+
     const currentWeek = getCurrentWeek();
-    const analytics = generateAnalytics(projectManagerInstance as ProjectManager, currentWeek);
-    const recentUpdates = (projectManagerInstance as ProjectManager).getUpdates()
+    const analytics = generateAnalytics(pm, currentWeek);
+    const recentUpdates = pm
+      .getUpdates()
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 10);
-    
-    const activeProjects = (projectManagerInstance as ProjectManager).getProjects()
-      .filter(p => p.status === 'active')
+
+    const activeProjects = pm
+      .getProjects()
+      .filter((p) => p.status === 'active')
       .slice(0, 10);
 
-    const upcomingDeadlines = (projectManagerInstance as ProjectManager).getTasks()
-      .filter(t => t.dueDate && t.status !== 'completed')
+    const upcomingDeadlines = pm
+      .getTasks()
+      .filter((t) => t.dueDate && t.status !== 'completed')
       .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
       .slice(0, 10);
 
-    const employees = (projectManagerInstance as ProjectManager).getEmployees();
-    const employeeStats = employees.map(employee => {
-      const stats = (projectManagerInstance as ProjectManager).getEmployeeStats(employee.id);
+    const employees = pm.getEmployees();
+    const employeeStats = employees.map((employee) => {
+      const stats = pm.getEmployeeStats(employee.id);
       return {
         employee,
-        lastUpdate: getLastUpdateDate(employee.id, projectManagerInstance as ProjectManager),
+        lastUpdate: getLastUpdateDate(employee.id, pm),
         tasksCompleted: stats.completed,
         tasksInProgress: stats.inProgress,
-        tasksBlocked: stats.blocked
+        tasksBlocked: stats.blocked,
       };
     });
 
@@ -57,11 +70,21 @@ dashboardRouter.get('/overview', async (req, res) => {
       recentUpdates,
       activeProjects,
       upcomingDeadlines,
-      employeeStats
+      employeeStats,
     };
 
-    res.json(dashboardData);
+    console.log('[DASHBOARD] Analytics summary', {
+      weekOf: currentWeek,
+      totalUpdates: analytics.totalUpdates,
+      activeEmployees: analytics.activeEmployees,
+      completedTasks: analytics.completedTasks,
+      blockedTasks: analytics.blockedTasks,
+    });
 
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+    res.json(dashboardData);
   } catch (error) {
     console.error('[DASHBOARD] Error generating overview:', error);
     res.status(500).json({ error: 'Failed to generate dashboard overview' });

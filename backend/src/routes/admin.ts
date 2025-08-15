@@ -7,6 +7,7 @@ res.json({ ok: true, role: 'admin' })
 })
 
 adminRouter.get('/', (_req, res) => {
+const uiVersion = process.env.ADMIN_UI_VERSION || (process.env.VERCEL_GIT_COMMIT_SHA ? process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7) : '') || 'dev'
 const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -51,12 +52,13 @@ const html = `<!doctype html>
   .section-actions { display:flex; gap:8px; align-items:center; }
   .sr { position:absolute; left:-9999px; }
   footer { margin-top:16px; color:var(--muted); font-size:12px; text-align:center; }
+  .version { color: var(--muted); font-weight: 600; }
 </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>DropManager — Admin Dashboard</h1>
+      <h1>DropManager — Admin Dashboard <span class="version" id="uiVersion"></span></h1>
       <div class="controls">
         <button id="refresh" class="btn">Refresh</button>
         <span id="lastRefreshed" class="muted"></span>
@@ -121,6 +123,17 @@ const html = `<!doctype html>
     </div>
 
     <section class="panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <h2>Debug</h2>
+        <div class="section-actions">
+          <button class="btn secondary" id="refreshDebug">Refresh Debug</button>
+        </div>
+      </div>
+      <div class="muted" style="margin-bottom:8px;">Project Manager state and server info.</div>
+      <pre id="debugInfo" class="muted" style="white-space:pre-wrap; overflow:auto; max-height:220px;">Loading…</pre>
+    </section>
+
+    <section class="panel">
       <h2>Employees</h2>
       <table>
         <thead>
@@ -130,17 +143,26 @@ const html = `<!doctype html>
       </table>
     </section>
 
-    <footer>DropManager Admin • <span class="muted">v0</span></footer>
+    <footer>DropManager Admin • <span class="muted" id="footerVersion">v</span></footer>
   </div>
 
 <script>
+const UI_VERSION = ${JSON.stringify('${uiVersion}')};
+console.log('[ADMIN] UI boot', { version: UI_VERSION, ts: new Date().toISOString() });
+
 async function fetchJSON(path){
   const res = await fetch(path, { headers: { 'Accept':'application/json' }, cache: 'no-store' });
   if(!res.ok) throw new Error('Request failed: '+res.status);
   return await res.json();
 }
 
-function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+function escapeHtml(s){
+  const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' };
+  return (s||'').toString().replace(/[&<>"']/g, function(c){
+    if (c === "'") return '&#39;';
+    return map[c] || c;
+  });
+}
 
 function fmtDate(d){ try { return new Date(d).toLocaleString(); } catch { return d || '—'; } }
 
@@ -200,10 +222,19 @@ function renderOverview(data){
 async function refreshAll(){
   try{
     const tsParam = 'ts=' + Date.now();
+    console.log('[ADMIN] Fetching overview...');
     const data = await fetchJSON('/dashboard/overview?' + tsParam);
+    console.log('[ADMIN] Overview loaded', {
+      analytics: data && data.analytics ? data.analytics : null,
+      recentUpdates: (data && data.recentUpdates ? data.recentUpdates.length : 0),
+      activeProjects: (data && data.activeProjects ? data.activeProjects.length : 0),
+      upcomingDeadlines: (data && data.upcomingDeadlines ? data.upcomingDeadlines.length : 0),
+      employeeStats: (data && data.employeeStats ? data.employeeStats.length : 0),
+    });
     renderOverview(data);
     const ts = new Date();
     document.getElementById('lastRefreshed').textContent = 'Updated ' + ts.toLocaleTimeString();
+    await refreshDebug();
   } catch (e){
     console.error('[ADMIN] Failed to load overview', e);
     document.getElementById('recentUpdates').innerHTML = '<span class="error">Failed to load. Check server logs.</span>';
@@ -216,10 +247,29 @@ document.getElementById('copyOverview').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(text); } catch {}
 });
 
+async function refreshDebug(){
+  try{
+    const tsParam = 'ts=' + Date.now();
+    console.log('[ADMIN] Fetching debug...');
+    const dbg = await fetchJSON('/dashboard/debug?' + tsParam);
+    document.getElementById('debugInfo').textContent = JSON.stringify(dbg, null, 2);
+  } catch (e){
+    console.error('[ADMIN] Failed to load debug', e);
+    document.getElementById('debugInfo').textContent = 'Failed to load debug info.';
+  }
+}
+
+document.getElementById('refreshDebug').addEventListener('click', refreshDebug);
+document.getElementById('uiVersion').textContent = 'v' + UI_VERSION;
+document.getElementById('footerVersion').textContent = 'v' + UI_VERSION;
+
 refreshAll();
 </script>
 </body>
 </html>`
 res.setHeader('Content-Type', 'text/html; charset=utf-8')
+res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+res.setHeader('Pragma', 'no-cache')
+res.setHeader('Expires', '0')
 res.status(200).send(html)
 })
