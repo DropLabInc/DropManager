@@ -8,6 +8,7 @@ import { adminRouter } from './routes/admin.js'
 import { inboundRouter } from './routes/inbound.js'
 import { dashboardRouter, setProjectManager } from './routes/dashboard.js'
 import { testRouter } from './routes/test.js'
+import { agentsRouter } from './routes/agents.js'
 import { createStore } from './store/memory.js'
 import { ProjectManager } from './services/projectManager.js'
 
@@ -40,6 +41,7 @@ app.use('/admin', adminRouter)
 app.use('/inbound', inboundRouter)
 app.use('/dashboard', dashboardRouter)
 app.use('/test', testRouter)
+app.use('/agents', agentsRouter)
 
 const port = Number(process.env.PORT || 8080)
 app.listen(port, () => {

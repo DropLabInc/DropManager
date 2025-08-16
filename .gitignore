@@ -25,3 +25,6 @@ Thumbs.db
 
 # Coverage
 coverage/
+
+# Local stories and artificial test content (not tracked)
+Stories/

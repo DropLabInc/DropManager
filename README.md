@@ -172,6 +172,12 @@ DropManager/
 └── README.md               # This file
 ```
 
+### Stories folder (local artificial test cases)
+
+- The `Stories/` directory may be created locally to store example message transcripts and synthetic scenarios used during development and testing.
+- This folder is ignored by git (see `.gitignore`) and should not contain secrets or production data.
+- Use it to stage realistic inputs for local runs, load tests, and agent evaluation.
+
 ## 🎯 Current Status
 
 ✅ **Completed Features:**
