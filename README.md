@@ -178,6 +178,19 @@ DropManager/
 - This folder is ignored by git (see `.gitignore`) and should not contain secrets or production data.
 - Use it to stage realistic inputs for local runs, load tests, and agent evaluation.
 
+Current contents snapshot (local only, not tracked):
+
+- Top-level helpers: `analyze_*.py`, `generate_*timeline.py`, `refine_generated_content.py`, `summarize_generated_content.py`, `requirements.txt`, `gemini_prompt.txt`, and utilities to parse and fill activity gaps
+- Aggregate CSVs: `Check-ins ..._all.csv` and per-employee CSVs
+- `Data/` per-person subfolders (examples):
+  - `Alex/`, `Aliya/` (10 md notes), `Amir/` (12 md), `Bayan/` (46 md), `Catherine/`, `Darton/`, `Hesam/` (23 md), `Kam/` (39 md), `Kimia/` (weekly check-in md), `Mori/` (md + csv), `Nirvana/` (md + csv), `Rosemary/` (47 md + csv), `Sayan/` (csv), `Sayeh/` (md + csv), `Sergio/` (md + jpg + csv), `Shaheer/` (md + csv), `Shahzad/` (md + csv), `Tyler/` (md + csv)
+  - `Weekly Updates_2024/` with ~39 PDFs of weekly updates
+- `weekly_analyses/` time series of summary analyses from 2024-02-02 to 2024-12-19
+
+These files are ideal for creating offline fixtures and evaluation runs while we iterate on the multi‑agent pipeline.
+
+See `STORIES_GUIDE.md` for a detailed guide on how to use this content to simulate webhooks, evaluate agents, and benchmark analytics.
+
 ## 🎯 Current Status
 
 ✅ **Completed Features:**
