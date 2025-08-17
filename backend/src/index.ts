@@ -7,6 +7,7 @@ import { cronRouter } from './routes/cron.js'
 import { adminRouter } from './routes/admin.js'
 import { inboundRouter } from './routes/inbound.js'
 import { dashboardRouter, setProjectManager } from './routes/dashboard.js'
+import analysisRouter, { setProjectManager as setAnalysisProjectManager } from './routes/analysis.js'
 import { testRouter } from './routes/test.js'
 import { agentsRouter } from './routes/agents.js'
 import { createStore } from './store/memory.js'
@@ -27,6 +28,7 @@ let projectManager: ProjectManager;
 try {
   projectManager = new ProjectManager();
   setProjectManager(projectManager);
+  setAnalysisProjectManager(projectManager);
   console.log('[project-manager] Initialized with Gemini NLP', { instanceId: (projectManager as any).instanceId });
 } catch (error) {
   console.error('[project-manager] Failed to initialize:', error);
@@ -40,6 +42,7 @@ app.use('/cron', cronRouter)
 app.use('/admin', adminRouter)
 app.use('/inbound', inboundRouter)
 app.use('/dashboard', dashboardRouter)
+app.use('/analysis', analysisRouter)
 app.use('/test', testRouter)
 app.use('/agents', agentsRouter)
 

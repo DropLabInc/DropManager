@@ -1,0 +1,1133 @@
+{
+  "employees": {
+    "emp_no5epe": {
+      "id": "emp_no5epe",
+      "email": "persistence.test@dropmanager.com",
+      "displayName": "Unknown User",
+      "isActive": true,
+      "createdAt": "2025-08-17T01:26:55.705Z",
+      "lastUpdateAt": "2025-08-17T01:27:21.746Z"
+    },
+    "emp_ltactl": {
+      "id": "emp_ltactl",
+      "email": "bayan@company.com",
+      "displayName": "Bayan Mashrequi",
+      "isActive": true,
+      "createdAt": "2025-08-17T01:30:37.199Z",
+      "lastUpdateAt": "2025-08-17T01:30:41.021Z"
+    },
+    "emp_by0e11": {
+      "id": "emp_by0e11",
+      "email": "nirvana@company.com",
+      "displayName": "Nirvana Smith",
+      "isActive": true,
+      "createdAt": "2025-08-17T01:30:54.604Z",
+      "lastUpdateAt": "2025-08-17T01:31:07.665Z"
+    },
+    "emp_o097gm": {
+      "id": "emp_o097gm",
+      "email": "rosemary@company.com",
+      "displayName": "Rosemary Wilson",
+      "isActive": true,
+      "createdAt": "2025-08-17T01:31:26.232Z",
+      "lastUpdateAt": "2025-08-17T01:31:54.085Z"
+    },
+    "emp_te602": {
+      "id": "emp_te602",
+      "email": "sayeh@company.com",
+      "displayName": "Sayeh Sayehson",
+      "isActive": true,
+      "createdAt": "2025-08-17T01:32:08.914Z",
+      "lastUpdateAt": "2025-08-17T01:32:31.536Z"
+    },
+    "emp_fha23t": {
+      "id": "emp_fha23t",
+      "email": "mori@company.com",
+      "displayName": "Mori Tanaka",
+      "isActive": true,
+      "createdAt": "2025-08-17T01:32:43.716Z",
+      "lastUpdateAt": "2025-08-17T01:33:26.050Z"
+    },
+    "emp_1wqtly": {
+      "id": "emp_1wqtly",
+      "email": "shaheer@company.com",
+      "displayName": "Shaheer Ahmad",
+      "isActive": true,
+      "createdAt": "2025-08-17T01:33:37.699Z",
+      "lastUpdateAt": "2025-08-17T01:34:07.133Z"
+    }
+  },
+  "projects": {
+    "development": {
+      "id": "development",
+      "name": "Feature Development",
+      "description": "New feature development and enhancements",
+      "status": "active",
+      "priority": "high",
+      "assignedEmployees": [],
+      "tags": [
+        "development",
+        "features"
+      ],
+      "createdAt": "2025-08-17T01:26:51.921Z",
+      "updatedAt": "2025-08-17T01:26:51.921Z"
+    },
+    "critical-design-revisions_1755394267662": {
+      "id": "critical-design-revisions_1755394267662",
+      "name": "Critical Design Revisions",
+      "description": "AI-suggested project based on task analysis: Revise Bottom_Jig_2_1 CAD for Critical Tolerance Issue",
+      "status": "active",
+      "priority": "critical",
+      "assignedEmployees": [
+        "emp_by0e11"
+      ],
+      "tags": [
+        "CAD",
+        "Design",
+        "Jig",
+        "PotentiostatV5_2",
+        "Bottom_Jig_2_1",
+        "Tolerance",
+        "Mechanical",
+        "Prototyping",
+        "Manufacturing",
+        "ai-created",
+        "gemini-suggested"
+      ],
+      "createdAt": "2025-08-17T01:31:07.662Z",
+      "updatedAt": "2025-08-17T01:31:07.662Z"
+    },
+    "biosafety-compliance-management_1755394406041": {
+      "id": "biosafety-compliance-management_1755394406041",
+      "name": "Biosafety Compliance Management",
+      "description": "AI-suggested project based on task analysis: Establish Biosafety Compliance Measures",
+      "status": "active",
+      "priority": "high",
+      "assignedEmployees": [
+        "emp_fha23t"
+      ],
+      "tags": [
+        "biosafety",
+        "compliance",
+        "regulations",
+        "lab",
+        "ai-created",
+        "gemini-suggested"
+      ],
+      "createdAt": "2025-08-17T01:33:26.041Z",
+      "updatedAt": "2025-08-17T01:33:26.041Z"
+    },
+    "asset-management_1755394447128": {
+      "id": "asset-management_1755394447128",
+      "name": "Asset Management",
+      "description": "AI-suggested project based on task analysis: Establish valve serial number tracking in Notion",
+      "status": "active",
+      "priority": "medium",
+      "assignedEmployees": [
+        "emp_1wqtly"
+      ],
+      "tags": [
+        "serial-numbers",
+        "tracking",
+        "valves",
+        "Notion",
+        "data-management",
+        "ai-created",
+        "gemini-suggested"
+      ],
+      "createdAt": "2025-08-17T01:34:07.128Z",
+      "updatedAt": "2025-08-17T01:34:07.128Z"
+    }
+  },
+  "tasks": {
+    "task_1755394026673_5eppp6v5b": {
+      "id": "task_1755394026673_5eppp6v5b",
+      "employeeId": "emp_no5epe",
+      "title": "Neural network optimization for holographic reconstruction",
+      "description": "Working on neural network optimization for holographic reconstruction.",
+      "status": "in-progress",
+      "priority": "medium",
+      "tags": [
+        "neural network",
+        "optimization",
+        "holography",
+        "reconstruction",
+        "AI"
+      ],
+      "createdAt": "2025-08-17T01:27:06.673Z",
+      "updatedAt": "2025-08-17T01:27:06.673Z",
+      "projectId": "development"
+    },
+    "task_1755394026673_u0nhzrqer": {
+      "id": "task_1755394026673_u0nhzrqer",
+      "employeeId": "emp_no5epe",
+      "title": "Verify message persistence",
+      "description": "Conducting a persistence test to ensure that the message persists across server restarts.",
+      "status": "in-progress",
+      "priority": "medium",
+      "tags": [
+        "persistence",
+        "testing",
+        "server"
+      ],
+      "createdAt": "2025-08-17T01:27:06.673Z",
+      "updatedAt": "2025-08-17T01:27:06.673Z",
+      "projectId": "maintenance"
+    },
+    "task_1755394261203_i4kwx8p5i": {
+      "id": "task_1755394261203_i4kwx8p5i",
+      "employeeId": "emp_by0e11",
+      "title": "Revise Bottom_Jig_2_1 CAD for Critical Tolerance Issue",
+      "description": "A critical tolerance stack-up issue has been identified in the Bottom_Jig_2_1 CAD's mounting features, preventing proper mechanical interface with the PotentiostatV5_2 PCB. This task requires a complete re-evaluation and revision of the Bottom_Jig_2_1 design, including re-iteration on the CAD and confirming manufacturing feasibility for the revised specifications. This is critical to avoid delays in the initial physical prototyping phase.",
+      "status": "in-progress",
+      "priority": "critical",
+      "estimatedHours": 24,
+      "tags": [
+        "CAD",
+        "Design",
+        "Jig",
+        "PotentiostatV5_2",
+        "Bottom_Jig_2_1",
+        "Tolerance",
+        "Mechanical",
+        "Prototyping",
+        "Manufacturing"
+      ],
+      "createdAt": "2025-08-17T01:31:01.203Z",
+      "updatedAt": "2025-08-17T01:31:01.203Z",
+      "projectId": "critical-design-revisions_1755394267662"
+    },
+    "task_1755394299071_90a3cldet": {
+      "id": "task_1755394299071_90a3cldet",
+      "employeeId": "emp_o097gm",
+      "title": "Achieve consistent NAT Card 3D Prints",
+      "description": "Address persistent warping and undefined features when 3D printing the NAT card using MED412 resin on the Phrozen printer, despite extensive support and orientation adjustments. This issue is directly impacting cytotoxicity validation.",
+      "status": "blocked",
+      "priority": "high",
+      "tags": [
+        "3D printing",
+        "NAT card",
+        "MED412",
+        "Phrozen",
+        "warping",
+        "cytotoxicity validation"
+      ],
+      "createdAt": "2025-08-17T01:31:39.071Z",
+      "updatedAt": "2025-08-17T01:31:39.071Z",
+      "projectId": "critical-design-revisions_1755394267662"
+    },
+    "task_1755394299071_gskhyx3lh": {
+      "id": "task_1755394299071_gskhyx3lh",
+      "employeeId": "emp_o097gm",
+      "title": "Resolve Cytometry Card Fluidic Issues",
+      "description": "Address unpredictable flow rates and capillary filaments blocking air holes in the cytometry cards, which are hindering consistent fluidic testing and video capture.",
+      "status": "blocked",
+      "priority": "high",
+      "tags": [
+        "cytometry card",
+        "fluidics",
+        "flow rates",
+        "capillary filaments",
+        "air holes",
+        "testing"
+      ],
+      "createdAt": "2025-08-17T01:31:39.071Z",
+      "updatedAt": "2025-08-17T01:31:39.071Z",
+      "projectId": "maintenance"
+    },
+    "task_1755394299071_mu8x7wgez": {
+      "id": "task_1755394299071_mu8x7wgez",
+      "employeeId": "emp_o097gm",
+      "title": "Execute Iterative Design & Print Trials",
+      "description": "Perform additional iterative design and print trials as necessitated by the persistent 3D printing issues with NAT cards and fluidic challenges with cytometry cards. This action is critical to overcome current technical blockers and mitigate project timeline delays.",
+      "status": "in-progress",
+      "priority": "high",
+      "tags": [
+        "design",
+        "printing",
+        "trials",
+        "iteration",
+        "project timeline",
+        "problem-solving"
+      ],
+      "createdAt": "2025-08-17T01:31:39.071Z",
+      "updatedAt": "2025-08-17T01:31:39.071Z",
+      "projectId": "critical-design-revisions_1755394267662"
+    },
+    "task_1755394331895_t1g4nxrlf": {
+      "id": "task_1755394331895_t1g4nxrlf",
+      "employeeId": "emp_te602",
+      "title": "Integrate Angular Spectrum Method in SampleGenerator",
+      "description": "Finalized the integration of the angular spectrum method for LED simulation and light propagation within the `SampleGenerator` file.",
+      "status": "completed",
+      "priority": "medium",
+      "tags": [
+        "LED simulation",
+        "light propagation",
+        "Angular Spectrum Method",
+        "SampleGenerator",
+        "integration"
+      ],
+      "createdAt": "2025-08-17T01:32:11.895Z",
+      "updatedAt": "2025-08-17T01:32:11.895Z",
+      "projectId": "development"
+    },
+    "task_1755394331895_qujp5chxt": {
+      "id": "task_1755394331895_qujp5chxt",
+      "employeeId": "emp_te602",
+      "title": "Develop NN architectures for phase/amplitude reconstruction",
+      "description": "Initiated development on neural network architectures for phase and amplitude reconstruction, leveraging insights gained during the SaPR implementation for initial model design considerations.",
+      "status": "in-progress",
+      "priority": "medium",
+      "tags": [
+        "neural networks",
+        "phase reconstruction",
+        "amplitude reconstruction",
+        "SaPR",
+        "model design",
+        "AI/ML"
+      ],
+      "createdAt": "2025-08-17T01:32:11.895Z",
+      "updatedAt": "2025-08-17T01:32:11.895Z",
+      "projectId": "development"
+    },
+    "task_1755394345037_mmzxrmok4": {
+      "id": "task_1755394345037_mmzxrmok4",
+      "employeeId": "emp_te602",
+      "title": "Refine SampleGenerator for LED simulations with angular spectrum method",
+      "description": "Continued refining the `SampleGenerator` file, integrating the angular spectrum method for more accurate LED light propagation simulations. This update is critical for generating robust training data for subsequent phase and amplitude reconstruction efforts.",
+      "status": "in-progress",
+      "priority": "critical",
+      "tags": [
+        "SampleGenerator",
+        "LED simulation",
+        "angular spectrum method",
+        "light propagation",
+        "data generation",
+        "training data"
+      ],
+      "createdAt": "2025-08-17T01:32:25.037Z",
+      "updatedAt": "2025-08-17T01:32:25.037Z",
+      "projectId": "development"
+    },
+    "task_1755394374318_olk2kcujr": {
+      "id": "task_1755394374318_olk2kcujr",
+      "employeeId": "emp_fha23t",
+      "title": "RT-LAMP Workflow Validation",
+      "description": "Continue the validation process for the RT-LAMP workflow.",
+      "status": "in-progress",
+      "priority": "medium",
+      "tags": [
+        "RT-LAMP",
+        "workflow",
+        "validation",
+        "biotech"
+      ],
+      "createdAt": "2025-08-17T01:32:54.318Z",
+      "updatedAt": "2025-08-17T01:32:54.318Z",
+      "projectId": "development"
+    },
+    "task_1755394374318_r4r456aow": {
+      "id": "task_1755394374318_r4r456aow",
+      "employeeId": "emp_fha23t",
+      "title": "Troubleshoot Critical PCR Software Glitches",
+      "description": "Address and resolve critical PCR software glitches identified during initial RT-LAMP runs.",
+      "status": "not-started",
+      "priority": "critical",
+      "tags": [
+        "PCR",
+        "software",
+        "troubleshooting",
+        "glitch"
+      ],
+      "createdAt": "2025-08-17T01:32:54.318Z",
+      "updatedAt": "2025-08-17T01:32:54.318Z",
+      "projectId": "maintenance"
+    },
+    "task_1755394374318_ucy3qjpq5": {
+      "id": "task_1755394374318_ucy3qjpq5",
+      "employeeId": "emp_fha23t",
+      "title": "Troubleshoot Equipment Heating Issues",
+      "description": "Address and resolve critical equipment heating issues identified during initial RT-LAMP runs.",
+      "status": "not-started",
+      "priority": "critical",
+      "tags": [
+        "equipment",
+        "heating",
+        "troubleshooting",
+        "hardware",
+        "lab"
+      ],
+      "createdAt": "2025-08-17T01:32:54.318Z",
+      "updatedAt": "2025-08-17T01:32:54.318Z",
+      "projectId": "maintenance"
+    },
+    "task_1755394374318_p8tyslxjn": {
+      "id": "task_1755394374318_p8tyslxjn",
+      "employeeId": "emp_fha23t",
+      "title": "Complete Lab Setup",
+      "description": "Continue and finalize the overall lab setup process.",
+      "status": "in-progress",
+      "priority": "medium",
+      "tags": [
+        "lab",
+        "setup",
+        "infrastructure"
+      ],
+      "createdAt": "2025-08-17T01:32:54.318Z",
+      "updatedAt": "2025-08-17T01:32:54.318Z",
+      "projectId": "maintenance"
+    },
+    "task_1755394374318_4x8hxd2bs": {
+      "id": "task_1755394374318_4x8hxd2bs",
+      "employeeId": "emp_fha23t",
+      "title": "Organize Comprehensive Lab Inventory",
+      "description": "Continue actively organizing the comprehensive inventory for the lab.",
+      "status": "in-progress",
+      "priority": "medium",
+      "tags": [
+        "inventory",
+        "organization",
+        "lab management"
+      ],
+      "createdAt": "2025-08-17T01:32:54.318Z",
+      "updatedAt": "2025-08-17T01:32:54.318Z",
+      "projectId": "general"
+    },
+    "task_1755394374318_xjyjenm00": {
+      "id": "task_1755394374318_xjyjenm00",
+      "employeeId": "emp_fha23t",
+      "title": "Establish Biosafety Compliance Measures",
+      "description": "Ensure all necessary biosafety compliance measures are fully established and documented for the lab.",
+      "status": "in-progress",
+      "priority": "high",
+      "tags": [
+        "biosafety",
+        "compliance",
+        "regulations",
+        "lab"
+      ],
+      "createdAt": "2025-08-17T01:32:54.318Z",
+      "updatedAt": "2025-08-17T01:32:54.318Z",
+      "projectId": "biosafety-compliance-management_1755394406041"
+    },
+    "task_1755394423491_gt6457341": {
+      "id": "task_1755394423491_gt6457341",
+      "employeeId": "emp_1wqtly",
+      "title": "Address manifold-test jig compatibility for testing",
+      "description": "Address the compatibility of the new manifold with the test jig to enable crucial manifold testing.",
+      "status": "not-started",
+      "priority": "high",
+      "tags": [
+        "manifold",
+        "test-jig",
+        "compatibility",
+        "testing"
+      ],
+      "createdAt": "2025-08-17T01:33:43.491Z",
+      "updatedAt": "2025-08-17T01:33:43.491Z",
+      "projectId": "development"
+    },
+    "task_1755394423491_jbbhaqrqd": {
+      "id": "task_1755394423491_jbbhaqrqd",
+      "employeeId": "emp_1wqtly",
+      "title": "Secure flappers for valve assembly",
+      "description": "Secure the needed flappers to prevent delays in ongoing valve assembly.",
+      "status": "not-started",
+      "priority": "high",
+      "tags": [
+        "flappers",
+        "valve-assembly",
+        "procurement",
+        "supply-chain"
+      ],
+      "createdAt": "2025-08-17T01:33:43.491Z",
+      "updatedAt": "2025-08-17T01:33:43.491Z",
+      "projectId": "general"
+    },
+    "task_1755394423491_4t4pfxpso": {
+      "id": "task_1755394423491_4t4pfxpso",
+      "employeeId": "emp_1wqtly",
+      "title": "Establish valve serial number tracking in Notion",
+      "description": "Establish the serial number tracking for all valves in Notion.",
+      "status": "not-started",
+      "priority": "medium",
+      "tags": [
+        "serial-numbers",
+        "tracking",
+        "valves",
+        "Notion",
+        "data-management"
+      ],
+      "createdAt": "2025-08-17T01:33:43.491Z",
+      "updatedAt": "2025-08-17T01:33:43.491Z",
+      "projectId": "asset-management_1755394447128"
+    },
+    "task_1755394465628_hn1p14j0v": {
+      "id": "task_1755394465628_hn1p14j0v",
+      "employeeId": "emp_ltactl",
+      "title": "Bring three 3.0 Jig systems to operational status",
+      "description": "Successfully brought three 3.0 Jig systems to operational status by resolving a critical hardware bug.",
+      "status": "completed",
+      "priority": "critical",
+      "tags": [
+        "Jig system",
+        "hardware",
+        "bug fix",
+        "system bringup"
+      ],
+      "createdAt": "2025-08-17T01:34:25.628Z",
+      "updatedAt": "2025-08-17T01:34:25.628Z",
+      "projectId": "maintenance"
+    },
+    "task_1755394465628_3btmq8pcq": {
+      "id": "task_1755394465628_3btmq8pcq",
+      "employeeId": "emp_ltactl",
+      "title": "Complete LabSImple Megastat PID heater board bringup",
+      "description": "Completed the LabSImple Megastat PID heater board bringup.",
+      "status": "completed",
+      "priority": "medium",
+      "tags": [
+        "LabSImple",
+        "Megastat",
+        "PID heater",
+        "board bringup"
+      ],
+      "createdAt": "2025-08-17T01:34:25.628Z",
+      "updatedAt": "2025-08-17T01:34:25.628Z",
+      "projectId": "development"
+    },
+    "task_1755394465628_a43amz66k": {
+      "id": "task_1755394465628_a43amz66k",
+      "employeeId": "emp_ltactl",
+      "title": "Develop high-sensitivity optical setup for APD board fluorescence detection",
+      "description": "Significant progress was made on the high-sensitivity optical setup for APD board fluorescence detection.",
+      "status": "in-progress",
+      "priority": "medium",
+      "tags": [
+        "optical setup",
+        "APD board",
+        "fluorescence detection",
+        "system integration"
+      ],
+      "createdAt": "2025-08-17T01:34:25.628Z",
+      "updatedAt": "2025-08-17T01:34:25.628Z",
+      "projectId": "general"
+    },
+    "task_1755394465628_5zovksolz": {
+      "id": "task_1755394465628_5zovksolz",
+      "employeeId": "emp_ltactl",
+      "title": "Order updated top board to resolve pogo pin issues",
+      "description": "Placed an updated top board order to resolve pogo pin issues for the high-sensitivity optical setup, furthering system integration.",
+      "status": "completed",
+      "priority": "high",
+      "tags": [
+        "hardware",
+        "pogo pin",
+        "board order",
+        "system integration"
+      ],
+      "createdAt": "2025-08-17T01:34:25.628Z",
+      "updatedAt": "2025-08-17T01:34:25.628Z",
+      "projectId": "critical-design-revisions_1755394267662"
+    }
+  },
+  "updates": {
+    "update_1755394029325_pbonw3fka": {
+      "id": "update_1755394029325_pbonw3fka",
+      "employeeId": "emp_no5epe",
+      "weekOf": "2025-08-11",
+      "messageText": "PERSISTENCE TEST: Working on neural network optimization for holographic reconstruction. This message should persist across server restarts.",
+      "extractedTasks": [
+        {
+          "id": "task_1755394026673_5eppp6v5b",
+          "employeeId": "emp_no5epe",
+          "title": "Neural network optimization for holographic reconstruction",
+          "description": "Working on neural network optimization for holographic reconstruction.",
+          "status": "in-progress",
+          "priority": "medium",
+          "tags": [
+            "neural network",
+            "optimization",
+            "holography",
+            "reconstruction",
+            "AI"
+          ],
+          "createdAt": "2025-08-17T01:27:06.673Z",
+          "updatedAt": "2025-08-17T01:27:06.673Z",
+          "projectId": "development"
+        },
+        {
+          "id": "task_1755394026673_u0nhzrqer",
+          "employeeId": "emp_no5epe",
+          "title": "Verify message persistence",
+          "description": "Conducting a persistence test to ensure that the message persists across server restarts.",
+          "status": "in-progress",
+          "priority": "medium",
+          "tags": [
+            "persistence",
+            "testing",
+            "server"
+          ],
+          "createdAt": "2025-08-17T01:27:06.673Z",
+          "updatedAt": "2025-08-17T01:27:06.673Z",
+          "projectId": "maintenance"
+        }
+      ],
+      "projects": [
+        "development",
+        "maintenance"
+      ],
+      "sentiment": "neutral",
+      "hasImages": false,
+      "imageCount": 0,
+      "chatMetadata": {
+        "spaceName": "",
+        "threadName": "",
+        "messageName": "",
+        "spaceType": ""
+      },
+      "createdAt": "2025-08-17T01:27:09.325Z",
+      "processedAt": "2025-08-17T01:27:09.325Z"
+    },
+    "update_1755394241020_33sqpn0o8": {
+      "id": "update_1755394241020_33sqpn0o8",
+      "employeeId": "emp_ltactl",
+      "weekOf": "2025-08-11",
+      "messageText": "Advanced the high-sensitivity APD board bring-up for fluorescence detection, actively troubleshooting photon detection complexity by optimizing op-amp gains and addressing noise sources. Concurrently, we've finalized the Top Board pogo pin redesign and continued iterating on brushless motor driver selection, focusing on seamless integration with the 3.0 Jig and Megastat systems.",
+      "extractedTasks": [],
+      "projects": [],
+      "sentiment": "positive",
+      "hasImages": false,
+      "imageCount": 0,
+      "chatMetadata": {
+        "spaceName": "",
+        "threadName": "",
+        "messageName": "",
+        "spaceType": ""
+      },
+      "createdAt": "2025-08-17T01:30:41.020Z",
+      "processedAt": "2025-08-17T01:30:41.020Z"
+    },
+    "update_1755394261264_galrmvwmp": {
+      "id": "update_1755394261264_galrmvwmp",
+      "employeeId": "emp_by0e11",
+      "weekOf": "2025-08-11",
+      "messageText": "During the detailed review of the PotentiostatV5_2 and Bottom_Jig_2_1 CAD files, I've identified a critical tolerance stack-up issue in the jig's mounting features that would prevent proper mechanical interface with the potentiostat's PCB. This requires a complete re-evaluation and revision of the Bottom_Jig_2_1 design, potentially delaying the initial physical prototyping phase by 2-3 days while I re-iterate on the CAD and confirm manufacturing feasibility for the revised specifications.",
+      "extractedTasks": [
+        {
+          "id": "task_1755394261203_i4kwx8p5i",
+          "employeeId": "emp_by0e11",
+          "title": "Revise Bottom_Jig_2_1 CAD for Critical Tolerance Issue",
+          "description": "A critical tolerance stack-up issue has been identified in the Bottom_Jig_2_1 CAD's mounting features, preventing proper mechanical interface with the PotentiostatV5_2 PCB. This task requires a complete re-evaluation and revision of the Bottom_Jig_2_1 design, including re-iteration on the CAD and confirming manufacturing feasibility for the revised specifications. This is critical to avoid delays in the initial physical prototyping phase.",
+          "status": "in-progress",
+          "priority": "critical",
+          "estimatedHours": 24,
+          "tags": [
+            "CAD",
+            "Design",
+            "Jig",
+            "PotentiostatV5_2",
+            "Bottom_Jig_2_1",
+            "Tolerance",
+            "Mechanical",
+            "Prototyping",
+            "Manufacturing"
+          ],
+          "createdAt": "2025-08-17T01:31:01.203Z",
+          "updatedAt": "2025-08-17T01:31:01.203Z",
+          "projectId": "critical-design-revisions_1755394267662"
+        }
+      ],
+      "projects": [
+        "critical-design-revisions_1755394267662"
+      ],
+      "sentiment": "blocked",
+      "hasImages": false,
+      "imageCount": 0,
+      "chatMetadata": {
+        "spaceName": "",
+        "threadName": "",
+        "messageName": "",
+        "spaceType": ""
+      },
+      "createdAt": "2025-08-17T01:31:01.264Z",
+      "processedAt": "2025-08-17T01:31:01.264Z"
+    },
+    "update_1755394302849_wmn7nqhzu": {
+      "id": "update_1755394302849_wmn7nqhzu",
+      "employeeId": "emp_o097gm",
+      "weekOf": "2025-08-11",
+      "messageText": "I am facing persistent challenges 3D printing the NAT card with MED412 on the Phrozen, where warping and undefined features continue despite extensive support and orientation adjustments, directly impacting cytotoxicity validation. Additionally, unpredictable flow rates and capillary filaments blocking air holes in the cytometry cards are hindering consistent fluidic testing and video capture. This necessitates more iterative design and print trials, which is causing delays in both project timelines.",
+      "extractedTasks": [
+        {
+          "id": "task_1755394299071_90a3cldet",
+          "employeeId": "emp_o097gm",
+          "title": "Achieve consistent NAT Card 3D Prints",
+          "description": "Address persistent warping and undefined features when 3D printing the NAT card using MED412 resin on the Phrozen printer, despite extensive support and orientation adjustments. This issue is directly impacting cytotoxicity validation.",
+          "status": "blocked",
+          "priority": "high",
+          "tags": [
+            "3D printing",
+            "NAT card",
+            "MED412",
+            "Phrozen",
+            "warping",
+            "cytotoxicity validation"
+          ],
+          "createdAt": "2025-08-17T01:31:39.071Z",
+          "updatedAt": "2025-08-17T01:31:39.071Z",
+          "projectId": "critical-design-revisions_1755394267662"
+        },
+        {
+          "id": "task_1755394299071_gskhyx3lh",
+          "employeeId": "emp_o097gm",
+          "title": "Resolve Cytometry Card Fluidic Issues",
+          "description": "Address unpredictable flow rates and capillary filaments blocking air holes in the cytometry cards, which are hindering consistent fluidic testing and video capture.",
+          "status": "blocked",
+          "priority": "high",
+          "tags": [
+            "cytometry card",
+            "fluidics",
+            "flow rates",
+            "capillary filaments",
+            "air holes",
+            "testing"
+          ],
+          "createdAt": "2025-08-17T01:31:39.071Z",
+          "updatedAt": "2025-08-17T01:31:39.071Z",
+          "projectId": "maintenance"
+        },
+        {
+          "id": "task_1755394299071_mu8x7wgez",
+          "employeeId": "emp_o097gm",
+          "title": "Execute Iterative Design & Print Trials",
+          "description": "Perform additional iterative design and print trials as necessitated by the persistent 3D printing issues with NAT cards and fluidic challenges with cytometry cards. This action is critical to overcome current technical blockers and mitigate project timeline delays.",
+          "status": "in-progress",
+          "priority": "high",
+          "tags": [
+            "design",
+            "printing",
+            "trials",
+            "iteration",
+            "project timeline",
+            "problem-solving"
+          ],
+          "createdAt": "2025-08-17T01:31:39.071Z",
+          "updatedAt": "2025-08-17T01:31:39.071Z",
+          "projectId": "critical-design-revisions_1755394267662"
+        }
+      ],
+      "projects": [
+        "critical-design-revisions_1755394267662",
+        "maintenance"
+      ],
+      "sentiment": "negative",
+      "hasImages": false,
+      "imageCount": 0,
+      "chatMetadata": {
+        "spaceName": "",
+        "threadName": "",
+        "messageName": "",
+        "spaceType": ""
+      },
+      "createdAt": "2025-08-17T01:31:42.849Z",
+      "processedAt": "2025-08-17T01:31:42.849Z"
+    },
+    "update_1755394333466_bbjoqy53v": {
+      "id": "update_1755394333466_bbjoqy53v",
+      "employeeId": "emp_te602",
+      "weekOf": "2025-08-11",
+      "messageText": "Finalized the integration of the angular spectrum method for LED simulation and light propagation within the `SampleGenerator` file. Simultaneously, initiated development on neural network architectures for phase and amplitude reconstruction, leveraging insights gained during the SaPR implementation for initial model design considerations.",
+      "extractedTasks": [
+        {
+          "id": "task_1755394331895_t1g4nxrlf",
+          "employeeId": "emp_te602",
+          "title": "Integrate Angular Spectrum Method in SampleGenerator",
+          "description": "Finalized the integration of the angular spectrum method for LED simulation and light propagation within the `SampleGenerator` file.",
+          "status": "completed",
+          "priority": "medium",
+          "tags": [
+            "LED simulation",
+            "light propagation",
+            "Angular Spectrum Method",
+            "SampleGenerator",
+            "integration"
+          ],
+          "createdAt": "2025-08-17T01:32:11.895Z",
+          "updatedAt": "2025-08-17T01:32:11.895Z",
+          "projectId": "development"
+        },
+        {
+          "id": "task_1755394331895_qujp5chxt",
+          "employeeId": "emp_te602",
+          "title": "Develop NN architectures for phase/amplitude reconstruction",
+          "description": "Initiated development on neural network architectures for phase and amplitude reconstruction, leveraging insights gained during the SaPR implementation for initial model design considerations.",
+          "status": "in-progress",
+          "priority": "medium",
+          "tags": [
+            "neural networks",
+            "phase reconstruction",
+            "amplitude reconstruction",
+            "SaPR",
+            "model design",
+            "AI/ML"
+          ],
+          "createdAt": "2025-08-17T01:32:11.895Z",
+          "updatedAt": "2025-08-17T01:32:11.895Z",
+          "projectId": "development"
+        }
+      ],
+      "projects": [
+        "development"
+      ],
+      "sentiment": "positive",
+      "hasImages": false,
+      "imageCount": 0,
+      "chatMetadata": {
+        "spaceName": "",
+        "threadName": "",
+        "messageName": "",
+        "spaceType": ""
+      },
+      "createdAt": "2025-08-17T01:32:13.466Z",
+      "processedAt": "2025-08-17T01:32:13.466Z"
+    },
+    "update_1755394348300_kwkt55xly": {
+      "id": "update_1755394348300_kwkt55xly",
+      "employeeId": "emp_te602",
+      "weekOf": "2025-08-11",
+      "messageText": "Continued refining the `SampleGenerator` file, integrating the angular spectrum method for more accurate LED light propagation simulations. This update is critical for generating robust training data for subsequent phase and amplitude reconstruction efforts.",
+      "extractedTasks": [
+        {
+          "id": "task_1755394345037_mmzxrmok4",
+          "employeeId": "emp_te602",
+          "title": "Refine SampleGenerator for LED simulations with angular spectrum method",
+          "description": "Continued refining the `SampleGenerator` file, integrating the angular spectrum method for more accurate LED light propagation simulations. This update is critical for generating robust training data for subsequent phase and amplitude reconstruction efforts.",
+          "status": "in-progress",
+          "priority": "critical",
+          "tags": [
+            "SampleGenerator",
+            "LED simulation",
+            "angular spectrum method",
+            "light propagation",
+            "data generation",
+            "training data"
+          ],
+          "createdAt": "2025-08-17T01:32:25.037Z",
+          "updatedAt": "2025-08-17T01:32:25.037Z",
+          "projectId": "development"
+        }
+      ],
+      "projects": [
+        "development"
+      ],
+      "sentiment": "positive",
+      "hasImages": false,
+      "imageCount": 0,
+      "chatMetadata": {
+        "spaceName": "",
+        "threadName": "",
+        "messageName": "",
+        "spaceType": ""
+      },
+      "createdAt": "2025-08-17T01:32:28.300Z",
+      "processedAt": "2025-08-17T01:32:28.300Z"
+    },
+    "update_1755394378772_ckpnnqk4z": {
+      "id": "update_1755394378772_ckpnnqk4z",
+      "employeeId": "emp_fha23t",
+      "weekOf": "2025-08-11",
+      "messageText": "RT-LAMP workflow validation is ongoing; initial runs, while improvising with Syber Green Master Mix and Triton X-100 due to material constraints, helped identify critical PCR software glitches and equipment heating issues that require immediate troubleshooting. Concurrently, significant progress has been made on lab setup, though I'm still actively organizing the comprehensive inventory and ensuring all biosafety compliance measures are fully established.",
+      "extractedTasks": [
+        {
+          "id": "task_1755394374318_olk2kcujr",
+          "employeeId": "emp_fha23t",
+          "title": "RT-LAMP Workflow Validation",
+          "description": "Continue the validation process for the RT-LAMP workflow.",
+          "status": "in-progress",
+          "priority": "medium",
+          "tags": [
+            "RT-LAMP",
+            "workflow",
+            "validation",
+            "biotech"
+          ],
+          "createdAt": "2025-08-17T01:32:54.318Z",
+          "updatedAt": "2025-08-17T01:32:54.318Z",
+          "projectId": "development"
+        },
+        {
+          "id": "task_1755394374318_r4r456aow",
+          "employeeId": "emp_fha23t",
+          "title": "Troubleshoot Critical PCR Software Glitches",
+          "description": "Address and resolve critical PCR software glitches identified during initial RT-LAMP runs.",
+          "status": "not-started",
+          "priority": "critical",
+          "tags": [
+            "PCR",
+            "software",
+            "troubleshooting",
+            "glitch"
+          ],
+          "createdAt": "2025-08-17T01:32:54.318Z",
+          "updatedAt": "2025-08-17T01:32:54.318Z",
+          "projectId": "maintenance"
+        },
+        {
+          "id": "task_1755394374318_ucy3qjpq5",
+          "employeeId": "emp_fha23t",
+          "title": "Troubleshoot Equipment Heating Issues",
+          "description": "Address and resolve critical equipment heating issues identified during initial RT-LAMP runs.",
+          "status": "not-started",
+          "priority": "critical",
+          "tags": [
+            "equipment",
+            "heating",
+            "troubleshooting",
+            "hardware",
+            "lab"
+          ],
+          "createdAt": "2025-08-17T01:32:54.318Z",
+          "updatedAt": "2025-08-17T01:32:54.318Z",
+          "projectId": "maintenance"
+        },
+        {
+          "id": "task_1755394374318_p8tyslxjn",
+          "employeeId": "emp_fha23t",
+          "title": "Complete Lab Setup",
+          "description": "Continue and finalize the overall lab setup process.",
+          "status": "in-progress",
+          "priority": "medium",
+          "tags": [
+            "lab",
+            "setup",
+            "infrastructure"
+          ],
+          "createdAt": "2025-08-17T01:32:54.318Z",
+          "updatedAt": "2025-08-17T01:32:54.318Z",
+          "projectId": "maintenance"
+        },
+        {
+          "id": "task_1755394374318_4x8hxd2bs",
+          "employeeId": "emp_fha23t",
+          "title": "Organize Comprehensive Lab Inventory",
+          "description": "Continue actively organizing the comprehensive inventory for the lab.",
+          "status": "in-progress",
+          "priority": "medium",
+          "tags": [
+            "inventory",
+            "organization",
+            "lab management"
+          ],
+          "createdAt": "2025-08-17T01:32:54.318Z",
+          "updatedAt": "2025-08-17T01:32:54.318Z",
+          "projectId": "general"
+        },
+        {
+          "id": "task_1755394374318_xjyjenm00",
+          "employeeId": "emp_fha23t",
+          "title": "Establish Biosafety Compliance Measures",
+          "description": "Ensure all necessary biosafety compliance measures are fully established and documented for the lab.",
+          "status": "in-progress",
+          "priority": "high",
+          "tags": [
+            "biosafety",
+            "compliance",
+            "regulations",
+            "lab"
+          ],
+          "createdAt": "2025-08-17T01:32:54.318Z",
+          "updatedAt": "2025-08-17T01:32:54.318Z",
+          "projectId": "biosafety-compliance-management_1755394406041"
+        }
+      ],
+      "projects": [
+        "development",
+        "maintenance",
+        "general",
+        "biosafety-compliance-management_1755394406041"
+      ],
+      "sentiment": "neutral",
+      "hasImages": false,
+      "imageCount": 0,
+      "chatMetadata": {
+        "spaceName": "",
+        "threadName": "",
+        "messageName": "",
+        "spaceType": ""
+      },
+      "createdAt": "2025-08-17T01:32:58.772Z",
+      "processedAt": "2025-08-17T01:32:58.772Z"
+    },
+    "update_1755394428077_jqghizatd": {
+      "id": "update_1755394428077_jqghizatd",
+      "employeeId": "emp_1wqtly",
+      "weekOf": "2025-08-11",
+      "messageText": "Next, my primary focus will be on addressing the compatibility of the new manifold with the test jig to enable crucial manifold testing. Concurrently, I'll prioritize securing the needed flappers to prevent delays in ongoing valve assembly and establish the serial number tracking for all valves in Notion.",
+      "extractedTasks": [
+        {
+          "id": "task_1755394423491_gt6457341",
+          "employeeId": "emp_1wqtly",
+          "title": "Address manifold-test jig compatibility for testing",
+          "description": "Address the compatibility of the new manifold with the test jig to enable crucial manifold testing.",
+          "status": "not-started",
+          "priority": "high",
+          "tags": [
+            "manifold",
+            "test-jig",
+            "compatibility",
+            "testing"
+          ],
+          "createdAt": "2025-08-17T01:33:43.491Z",
+          "updatedAt": "2025-08-17T01:33:43.491Z",
+          "projectId": "development"
+        },
+        {
+          "id": "task_1755394423491_jbbhaqrqd",
+          "employeeId": "emp_1wqtly",
+          "title": "Secure flappers for valve assembly",
+          "description": "Secure the needed flappers to prevent delays in ongoing valve assembly.",
+          "status": "not-started",
+          "priority": "high",
+          "tags": [
+            "flappers",
+            "valve-assembly",
+            "procurement",
+            "supply-chain"
+          ],
+          "createdAt": "2025-08-17T01:33:43.491Z",
+          "updatedAt": "2025-08-17T01:33:43.491Z",
+          "projectId": "general"
+        },
+        {
+          "id": "task_1755394423491_4t4pfxpso",
+          "employeeId": "emp_1wqtly",
+          "title": "Establish valve serial number tracking in Notion",
+          "description": "Establish the serial number tracking for all valves in Notion.",
+          "status": "not-started",
+          "priority": "medium",
+          "tags": [
+            "serial-numbers",
+            "tracking",
+            "valves",
+            "Notion",
+            "data-management"
+          ],
+          "createdAt": "2025-08-17T01:33:43.491Z",
+          "updatedAt": "2025-08-17T01:33:43.491Z",
+          "projectId": "asset-management_1755394447128"
+        }
+      ],
+      "projects": [
+        "development",
+        "general",
+        "asset-management_1755394447128"
+      ],
+      "sentiment": "neutral",
+      "hasImages": false,
+      "imageCount": 0,
+      "chatMetadata": {
+        "spaceName": "",
+        "threadName": "",
+        "messageName": "",
+        "spaceType": ""
+      },
+      "createdAt": "2025-08-17T01:33:48.077Z",
+      "processedAt": "2025-08-17T01:33:48.077Z"
+    },
+    "update_1755394467470_dqvl6pi7l": {
+      "id": "update_1755394467470_dqvl6pi7l",
+      "employeeId": "emp_ltactl",
+      "weekOf": "2025-08-11",
+      "messageText": "Successfully brought three 3.0 Jig systems to operational status by resolving a critical hardware bug, and completed the LabSImple Megastat PID heater board bringup. Significant progress was also made on the high-sensitivity optical setup for APD board fluorescence detection, with an updated top board order placed to resolve pogo pin issues, furthering our system integration.",
+      "extractedTasks": [
+        {
+          "id": "task_1755394465628_hn1p14j0v",
+          "employeeId": "emp_ltactl",
+          "title": "Bring three 3.0 Jig systems to operational status",
+          "description": "Successfully brought three 3.0 Jig systems to operational status by resolving a critical hardware bug.",
+          "status": "completed",
+          "priority": "critical",
+          "tags": [
+            "Jig system",
+            "hardware",
+            "bug fix",
+            "system bringup"
+          ],
+          "createdAt": "2025-08-17T01:34:25.628Z",
+          "updatedAt": "2025-08-17T01:34:25.628Z",
+          "projectId": "maintenance"
+        },
+        {
+          "id": "task_1755394465628_3btmq8pcq",
+          "employeeId": "emp_ltactl",
+          "title": "Complete LabSImple Megastat PID heater board bringup",
+          "description": "Completed the LabSImple Megastat PID heater board bringup.",
+          "status": "completed",
+          "priority": "medium",
+          "tags": [
+            "LabSImple",
+            "Megastat",
+            "PID heater",
+            "board bringup"
+          ],
+          "createdAt": "2025-08-17T01:34:25.628Z",
+          "updatedAt": "2025-08-17T01:34:25.628Z",
+          "projectId": "development"
+        },
+        {
+          "id": "task_1755394465628_a43amz66k",
+          "employeeId": "emp_ltactl",
+          "title": "Develop high-sensitivity optical setup for APD board fluorescence detection",
+          "description": "Significant progress was made on the high-sensitivity optical setup for APD board fluorescence detection.",
+          "status": "in-progress",
+          "priority": "medium",
+          "tags": [
+            "optical setup",
+            "APD board",
+            "fluorescence detection",
+            "system integration"
+          ],
+          "createdAt": "2025-08-17T01:34:25.628Z",
+          "updatedAt": "2025-08-17T01:34:25.628Z",
+          "projectId": "general"
+        },
+        {
+          "id": "task_1755394465628_5zovksolz",
+          "employeeId": "emp_ltactl",
+          "title": "Order updated top board to resolve pogo pin issues",
+          "description": "Placed an updated top board order to resolve pogo pin issues for the high-sensitivity optical setup, furthering system integration.",
+          "status": "completed",
+          "priority": "high",
+          "tags": [
+            "hardware",
+            "pogo pin",
+            "board order",
+            "system integration"
+          ],
+          "createdAt": "2025-08-17T01:34:25.628Z",
+          "updatedAt": "2025-08-17T01:34:25.628Z",
+          "projectId": "critical-design-revisions_1755394267662"
+        }
+      ],
+      "projects": [
+        "maintenance",
+        "development",
+        "general",
+        "critical-design-revisions_1755394267662"
+      ],
+      "sentiment": "positive",
+      "hasImages": false,
+      "imageCount": 0,
+      "chatMetadata": {
+        "spaceName": "",
+        "threadName": "",
+        "messageName": "",
+        "spaceType": ""
+      },
+      "createdAt": "2025-08-17T01:34:27.471Z",
+      "processedAt": "2025-08-17T01:34:27.471Z"
+    }
+  }
+}

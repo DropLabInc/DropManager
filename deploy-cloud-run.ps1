@@ -27,8 +27,16 @@ Write-Output "Enabling required APIs..."
 gcloud services enable run.googleapis.com
 gcloud services enable cloudbuild.googleapis.com
 
-# Build and deploy to Cloud Run
-Write-Output "Building and deploying to Cloud Run..."
+# Navigate to backend directory (where the actual Node.js app is)
+Write-Output "Navigating to backend directory..."
+Set-Location "backend"
+
+# Build TypeScript
+Write-Output "Building TypeScript..."
+npm run build
+
+# Build and deploy to Cloud Run from backend directory
+Write-Output "Building and deploying to Cloud Run from backend directory..."
 gcloud run deploy $ServiceName `
     --source . `
     --platform managed `
@@ -40,6 +48,9 @@ gcloud run deploy $ServiceName `
     --min-instances 0 `
     --max-instances 10 `
     --timeout 300
+
+# Return to original directory
+Set-Location ".."
 
 if ($LASTEXITCODE -eq 0) {
     Write-Output ""

@@ -3,7 +3,11 @@ import { ProjectManager } from '../services/projectManager.js';
 
 export class ProjectAgent implements Agent<{ tasks: any[] }> {
   public name = 'project' as const;
-  private pm = new ProjectManager();
+  private pm: ProjectManager;
+
+  constructor(pm?: ProjectManager) {
+    this.pm = pm || new ProjectManager();
+  }
 
   canHandle(input: { tasks: any[] }): boolean {
     return Boolean(input && Array.isArray(input.tasks) && input.tasks.length > 0);

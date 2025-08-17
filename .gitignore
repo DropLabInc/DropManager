@@ -1,4 +1,4 @@
-﻿# Node
+# Node
 node_modules/
 .npm/
 
@@ -28,3 +28,5 @@ coverage/
 
 # Local stories and artificial test content (not tracked)
 Stories/
+backend/sa_key.json
+backend/data/

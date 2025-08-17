@@ -5,7 +5,8 @@ export type AgentType =
   | 'sentiment'
   | 'question'
   | 'reporting'
-  | 'notification';
+  | 'notification'
+  | 'analysis';
 
 export type AgentMessageType = 'REQUEST' | 'RESPONSE' | 'NOTIFICATION' | 'QUERY';
 

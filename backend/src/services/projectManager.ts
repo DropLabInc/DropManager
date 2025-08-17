@@ -1,6 +1,7 @@
 import { Employee, Project, Task, WeeklyUpdate, ProcessUpdateRequest, ProcessUpdateResponse } from '../types/index.js';
 import { Firestore } from '@google-cloud/firestore';
 import { GeminiNLP } from './geminiNLP.js';
+import { SimplePersistence, PersistentData } from './simplePersistence.js';
 
 export class ProjectManager {
   public readonly instanceId: string;
@@ -11,25 +12,143 @@ export class ProjectManager {
   private updates: Map<string, WeeklyUpdate> = new Map();
   private geminiNLP: GeminiNLP;
   private db: Firestore | null = null;
+  private persistence: SimplePersistence;
 
   constructor() {
     this.instanceId = 'pm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
     this.initializeDefaultProjects();
     this.geminiNLP = new GeminiNLP();
-    // Initialize Firestore if available
-    try {
-      const projectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT;
-      this.db = new Firestore({ projectId });
-      console.log('[PROJECT_MANAGER] Firestore initialized for project:', projectId || 'default env');
-      // Load existing data from Firestore
-      this.loadDataFromFirestore().catch(err => {
-        console.warn('[PROJECT_MANAGER] Failed to load data from Firestore:', err);
-      });
-    } catch (e) {
-      console.warn('[PROJECT_MANAGER] Firestore not initialized, using in-memory store only');
-    }
+    this.persistence = new SimplePersistence();
+    
+    // Initialize storage and load existing data
+    this.initializeStorage();
     console.log(`[PROJECT_MANAGER] Constructed instance ${this.instanceId}`);
   }
+
+  private initializeStorage(): void {
+    // Try Firestore first
+    this.initializeFirestore();
+    
+    // Always load from simple persistence (works regardless of Firestore)
+    this.loadFromSimplePersistence().catch(err => {
+      console.warn('[PROJECT_MANAGER] Failed to load from simple persistence:', err);
+    });
+  }
+
+  private initializeFirestore(): void {
+    try {
+      // Try multiple configuration approaches
+      let projectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT;
+      
+      // If no project ID is set, try to detect from environment
+      if (!projectId) {
+        console.log('[PROJECT_MANAGER] No GOOGLE_CLOUD_PROJECT set, trying alternative configurations...');
+        
+        // For local development, we can use a default project
+        projectId = 'dropmanager-local-dev';
+        console.log('[PROJECT_MANAGER] Using default project ID for local development:', projectId);
+      }
+
+      // Initialize Firestore with different auth strategies
+      let firestoreConfig: any = { projectId };
+      
+      // Check if we're in a Google Cloud environment (has default credentials)
+      const isGoogleCloudEnv = process.env.GOOGLE_APPLICATION_CREDENTIALS || 
+                              process.env.GCLOUD_PROJECT || 
+                              process.env.K_SERVICE; // Cloud Run indicator
+
+      if (!isGoogleCloudEnv) {
+        console.log('[PROJECT_MANAGER] Local development detected, using Firestore with default settings');
+        // For local development, Firestore will try to use:
+        // 1. GOOGLE_APPLICATION_CREDENTIALS file
+        // 2. gcloud application default credentials
+        // 3. Firestore emulator if FIRESTORE_EMULATOR_HOST is set
+      }
+
+      this.db = new Firestore(firestoreConfig);
+      console.log('[PROJECT_MANAGER] Firestore initialized successfully for project:', projectId);
+
+      // Test the connection and load data asynchronously
+      this.testConnectionAndLoadData();
+
+    } catch (initError: any) {
+      console.warn('[PROJECT_MANAGER] Firestore initialization failed:', initError.message);
+      console.log('[PROJECT_MANAGER] Using in-memory storage only');
+      this.db = null;
+    }
+  }
+
+  private async testConnectionAndLoadData(): Promise<void> {
+    if (!this.db) return;
+    
+    try {
+      // Test the connection with a simple read
+      const testCollection = this.db.collection('_health_check');
+      await testCollection.limit(1).get();
+      console.log('[PROJECT_MANAGER] Firestore connection test passed');
+      
+      // Load existing data from Firestore
+      await this.loadDataFromFirestore();
+    } catch (connectionError: any) {
+      console.warn('[PROJECT_MANAGER] Firestore connection failed:', connectionError.message);
+      console.log('[PROJECT_MANAGER] Continuing with in-memory storage only');
+      this.db = null;
+    }
+  }
+
+  private async loadFromSimplePersistence(): Promise<void> {
+    try {
+      const data = await this.persistence.load();
+      if (data) {
+        // Load employees
+        Object.entries(data.employees || {}).forEach(([id, employee]) => {
+          this.employees.set(id, employee as Employee);
+        });
+
+        // Load projects (but don't override default projects)
+        Object.entries(data.projects || {}).forEach(([id, project]) => {
+          if (!this.projects.has(id)) {
+            this.projects.set(id, project as Project);
+          }
+        });
+
+        // Load tasks
+        Object.entries(data.tasks || {}).forEach(([id, task]) => {
+          this.tasks.set(id, task as Task);
+        });
+
+        // Load updates
+        Object.entries(data.updates || {}).forEach(([id, update]) => {
+          this.updates.set(id, update as WeeklyUpdate);
+        });
+
+        console.log(`[PROJECT_MANAGER] Loaded from persistence: ${this.employees.size} employees, ${this.updates.size} updates`);
+      }
+    } catch (error: any) {
+      console.warn('[PROJECT_MANAGER] Failed to load from persistence:', error.message);
+    }
+  }
+
+  private async saveToSimplePersistence(): Promise<void> {
+    try {
+      const data: PersistentData = {
+        employees: Object.fromEntries(this.employees),
+        projects: Object.fromEntries(
+          Array.from(this.projects.entries()).filter(([id]) => 
+            !['general', 'maintenance', 'feature-dev', 'manufacturing'].includes(id)
+          )
+        ),
+        tasks: Object.fromEntries(this.tasks),
+        updates: Object.fromEntries(this.updates)
+      };
+
+      await this.persistence.save(data);
+    } catch (error: any) {
+      console.error('[PROJECT_MANAGER] Failed to save to persistence:', error.message);
+    }
+  }
+
+
 
   private initializeDefaultProjects() {
     // Create some default projects for categorization
@@ -120,21 +239,19 @@ export class ProjectManager {
 
       update.projects = assignedProjects;
       this.updates.set(update.id, update);
-      // Persist to Firestore if available (best-effort)
-      if (this.db) {
-        try {
-          await this.db.collection('updates').doc(update.id).set(update);
-          for (const task of extractedTasks) {
-            await this.db.collection('tasks').doc(task.id).set(task);
-          }
-        } catch (persistErr) {
-          console.warn('[PROJECT_MANAGER] Firestore persist failed:', persistErr);
-        }
+      
+      // Persist to Firestore
+      await this.saveToFirestore('updates', update.id, update);
+      for (const task of extractedTasks) {
+        await this.saveToFirestore('tasks', task.id, task);
       }
 
       // Update employee's last update time
       employee.lastUpdateAt = new Date().toISOString();
       this.employees.set(employee.id, employee);
+      
+      // Save updated employee to Firestore
+      await this.saveToFirestore('employees', employee.id, employee);
 
       return {
         success: true,
@@ -172,27 +289,15 @@ export class ProjectManager {
       console.log(`Created new employee: ${employee.displayName} (${employee.email})`);
       
       // Persist to Firestore
-      if (this.db) {
-        try {
-          await this.db.collection('employees').doc(employee.id).set(employee);
-        } catch (persistErr) {
-          console.warn('[PROJECT_MANAGER] Failed to persist employee to Firestore:', persistErr);
-        }
-      }
+      await this.saveToFirestore('employees', employee.id, employee);
     } else {
       // Update display name if it changed
       if (employee.displayName !== employeeData.displayName) {
         employee.displayName = employeeData.displayName;
         this.employees.set(employee.id, employee);
         
-        // Update in Firestore
-        if (this.db) {
-          try {
-            await this.db.collection('employees').doc(employee.id).set(employee);
-          } catch (persistErr) {
-            console.warn('[PROJECT_MANAGER] Failed to update employee in Firestore:', persistErr);
-          }
-        }
+        // Save updated employee to Firestore
+        await this.saveToFirestore('employees', employee.id, employee);
       }
     }
     
@@ -325,6 +430,9 @@ export class ProjectManager {
     this.projects.set(project.id, project);
     console.log(`[GEMINI] Created new project: ${project.name}`);
     
+    // Save to Firestore
+    await this.saveToFirestore('projects', project.id, project);
+    
     return project;
   }
 
@@ -429,6 +537,34 @@ export class ProjectManager {
     }
   }
 
+  private async saveToFirestore(collection: string, id: string, data: any): Promise<void> {
+    // Try Firestore first if available
+    if (this.db) {
+      try {
+        await this.db.collection(collection).doc(id).set(data);
+        console.log(`[PROJECT_MANAGER] Saved ${collection}/${id} to Firestore`);
+      } catch (error) {
+        console.error(`[PROJECT_MANAGER] Error saving ${collection}/${id} to Firestore:`, error);
+      }
+    }
+
+    // Always save to simple persistence as backup/primary
+    await this.saveToSimplePersistence();
+  }
+
+  private async deleteFromFirestore(collection: string, id: string): Promise<void> {
+    if (!this.db) {
+      return;
+    }
+
+    try {
+      await this.db.collection(collection).doc(id).delete();
+      console.log(`[PROJECT_MANAGER] Deleted ${collection}/${id} from Firestore`);
+    } catch (error) {
+      console.error(`[PROJECT_MANAGER] Error deleting ${collection}/${id} from Firestore:`, error);
+    }
+  }
+
   // Utility methods
   private generateUpdateId(): string {
     return 'update_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -493,5 +629,16 @@ export class ProjectManager {
         latestUpdate: Array.from(this.updates.values()).sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime())[0],
       }
     };
+  }
+
+  // Reset all data (for testing purposes)
+  public resetAllData(): void {
+    console.log(`[PROJECT_MANAGER] Resetting all data for instance ${this.instanceId}`);
+    this.employees.clear();
+    this.projects.clear();
+    this.tasks.clear();
+    this.updates.clear();
+    this.initializeDefaultProjects();
+    console.log('[PROJECT_MANAGER] Data reset complete');
   }
 }

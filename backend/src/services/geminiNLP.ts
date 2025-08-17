@@ -362,4 +362,25 @@ Respond in one of these formats:
     
     return 'neutral';
   }
+
+  public async generateText(prompt: string): Promise<string> {
+    if (!this.model) {
+      throw new Error('[GEMINI] Model not available for text generation');
+    }
+
+    try {
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      if (!text) {
+        throw new Error('Empty response from Gemini');
+      }
+      
+      return text.trim();
+    } catch (error) {
+      console.error('[GEMINI] Error generating text:', error);
+      throw new Error(`Text generation failed: ${error}`);
+    }
+  }
 }

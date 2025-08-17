@@ -23,6 +23,36 @@ function doPost(e) {
       console.error('[ERROR] Failed to parse body:', parseErr);
       event = {}; 
     }
+
+    // New: server-initiated proactive message API
+    // Expect payload: { op: 'send', sendToken: '...', spaceName: 'spaces/..', threadName?: 'threads/..', text: '...' }
+    if (event && event.op === 'send') {
+      try {
+        var props = PropertiesService.getScriptProperties();
+        var expected = (props.getProperty('SEND_TOKEN') || '').trim();
+        var provided = (event.sendToken || '').trim();
+        if (!expected) {
+          throw new Error('SEND_TOKEN not configured in script properties');
+        }
+        if (!provided || provided !== expected) {
+          throw new Error('Unauthorized: invalid send token');
+        }
+
+        if (!event.spaceName || !event.text) {
+          throw new Error('Missing spaceName or text');
+        }
+
+        var sendRes = sendChatMessage_(event.spaceName, event.threadName || '', event.text);
+        return ContentService
+          .createTextOutput(JSON.stringify({ ok: true, sent: true, result: sendRes }))
+          .setMimeType(ContentService.MimeType.JSON);
+      } catch (sendErr) {
+        console.error('[ERROR] Proactive send failed:', sendErr);
+        return ContentService
+          .createTextOutput(JSON.stringify({ ok: false, error: String(sendErr).slice(0, MAX_SNIPPET) }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+    }
     var resp = onMessage(event);
     console.log('[DEBUG] onMessage response:', JSON.stringify(resp, null, 2));
     return ContentService
@@ -61,13 +91,40 @@ function onMessage(event) {
     var senderEmail = p.message?.sender?.email || event.chat?.user?.email || '';
     var senderDisplay = p.message?.sender?.displayName || event.chat?.user?.displayName || '';
     var spaceType = p.space?.type || p.message?.space?.type || '';
+    // Additional identifiers to support cases where Chat omits senderEmail
+    var senderId = p.message?.sender?.name || event.chat?.user?.name || '';
+    // Deterministic fallback identifier when email is unavailable
+    var fallbackId = Utilities.base64EncodeWebSafe([senderDisplay || 'Unknown User', spaceName || '', threadName || ''].join('|'));
     
     console.log('[DEBUG] Chat metadata:', {
-      spaceName: spaceName, threadName: threadName, messageName: messageName, 
-      senderEmail: senderEmail, senderDisplay: senderDisplay, spaceType: spaceType
+      spaceName: spaceName, threadName: threadName, messageName: messageName,
+      senderEmail: senderEmail, senderDisplay: senderDisplay, senderId: senderId, fallbackId: fallbackId, spaceType: spaceType
     });
 
-    // Handle attachments (images from Chat or Drive)
+    // FAST-ACK: send immediately to backend (no blocking on images or backend response)
+    try {
+      sendToBackend_({
+        messageText: text,
+        files: [], // skip heavy image download for immediate response
+        metaIds: {
+          spaceName: spaceName,
+          threadName: threadName,
+          messageName: messageName,
+          senderEmail: senderEmail,
+          senderDisplay: senderDisplay,
+          senderId: senderId,
+          fallbackId: fallbackId,
+          spaceType: spaceType
+        }
+      });
+    } catch (fastErr) {
+      console.error('[ERROR] Fast-ack backend send failed (non-blocking):', fastErr);
+    }
+
+    // Immediate reply so Chat never times out
+    return chatReply_('Thanks! I\'m logging your update now.');
+
+    // Handle attachments (images from Chat or Drive) — unreachable in fast-ack path
     var atts = p.attachments || p.attachment || p.message?.attachments || p.message?.attachment || [];
     if (!Array.isArray(atts)) atts = [atts];
     console.log('[DEBUG] Found attachments:', atts.length);
@@ -112,7 +169,16 @@ function onMessage(event) {
       sendToBackend_({
         messageText: text,
         files: files,
-        metaIds: { spaceName: spaceName, threadName: threadName, messageName: messageName, senderEmail: senderEmail, senderDisplay: senderDisplay, spaceType: spaceType }
+        metaIds: {
+          spaceName: spaceName,
+          threadName: threadName,
+          messageName: messageName,
+          senderEmail: senderEmail,
+          senderDisplay: senderDisplay,
+          senderId: senderId,
+          fallbackId: fallbackId,
+          spaceType: spaceType
+        }
       });
       console.log('[DEBUG] Backend send completed');
     } catch (backendErr) {
@@ -312,6 +378,8 @@ function sendToBackend_(payload) {
     messageName: payload.metaIds?.messageName || '',
     senderEmail: payload.metaIds?.senderEmail || '',
     senderDisplay: payload.metaIds?.senderDisplay || '',
+    senderId: payload.metaIds?.senderId || '',
+    fallbackId: payload.metaIds?.fallbackId || '',
     spaceType: payload.metaIds?.spaceType || ''
   };
   console.log('[DEBUG] Meta object:', JSON.stringify(metaObj, null, 2));
@@ -328,6 +396,8 @@ function sendToBackend_(payload) {
     messageName: metaObj.messageName,
     senderEmail: metaObj.senderEmail,
     senderDisplay: metaObj.senderDisplay,
+    senderId: metaObj.senderId,
+    fallbackId: metaObj.fallbackId,
     spaceType: metaObj.spaceType
   };
 
@@ -401,6 +471,29 @@ function chatReply_(text) {
       }
     }
   };
+}
+
+// Send a message into a space (and optional thread) using hostAppDataAction
+function sendChatMessage_(spaceName, threadName, text) {
+  try {
+    var action = {
+      hostAppDataAction: {
+        chatDataAction: {
+          spaceName: spaceName,
+          createMessageAction: {
+            message: { text: String(text || '').slice(0, 9900) }
+          }
+        }
+      }
+    };
+    if (threadName) {
+      action.hostAppDataAction.chatDataAction.threadName = threadName;
+    }
+    return action;
+  } catch (err) {
+    console.error('[ERROR] sendChatMessage_ failed:', err);
+    throw err;
+  }
 }
 
 function generateSmartReply_(senderName, fileCount, messageText) {

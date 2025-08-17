@@ -62,10 +62,19 @@ inboundRouter.post('/webhook', upload.any(), async (req, res) => {
     const messageText = (req.body?.messageText as string) || meta.messageText || ''
     const senderEmail = (req.body?.senderEmail as string) || meta.senderEmail || metaIds.senderEmail || ''
     const senderDisplay = (req.body?.senderDisplay as string) || meta.senderDisplay || metaIds.senderDisplay || 'Unknown User'
+    // Additional identifiers to support replies when email is missing
+    const senderId = (req.body as any)?.senderId || meta.senderId || metaIds.senderId || ''
+    const fallbackId = (req.body as any)?.fallbackId || meta.fallbackId || metaIds.fallbackId || ''
     const weekOf = getWeekOfMonday(new Date())
 
-    // Create employee ID from email (simple hash for MVP)
-    const employeeId = senderEmail ? createEmployeeId(senderEmail) : 'unknown'
+    // Create deterministic employee ID from available identifiers (email > senderId > fallbackId)
+    const employeeId = senderEmail
+      ? createEmployeeId(senderEmail)
+      : senderId
+        ? createEmployeeId(String(senderId))
+        : fallbackId
+          ? createEmployeeId(String(fallbackId))
+          : 'unknown'
 
     // Debug logging
     console.log('[INBOUND] Extracted data:', {
@@ -76,10 +85,12 @@ inboundRouter.post('/webhook', upload.any(), async (req, res) => {
       employeeId: employeeId,
       hasMessageText: !!messageText,
       hasSenderEmail: !!senderEmail,
-      willProcess: !!(messageText && senderEmail)
+      senderId: senderId,
+      fallbackId: fallbackId,
+      willProcess: !!(messageText && (senderEmail || senderId || fallbackId))
     })
 
-    if (messageText && senderEmail) {
+    if (messageText && (senderEmail || senderId || fallbackId)) {
       // Build request for ProjectManager with Gemini NLP
       const hasImages = Boolean((meta.hasImages as boolean) ?? (mapped.length > 0))
       const imageCount = Number((meta.imageCount as number) ?? mapped.length)
@@ -93,7 +104,7 @@ inboundRouter.post('/webhook', upload.any(), async (req, res) => {
       const processReq: ProcessUpdateRequest = {
         messageText,
         employeeId: employeeId,
-        employeeEmail: senderEmail,
+        employeeEmail: senderEmail || 'unknown@unknown',
         employeeDisplayName: senderDisplay,
         weekOf,
         hasImages,
@@ -101,7 +112,45 @@ inboundRouter.post('/webhook', upload.any(), async (req, res) => {
         chatMetadata
       }
 
-      console.log('[INBOUND] Processing update via ProjectManager...')
+      // If request originated from Google Chat bot, respond fast to avoid Chat 30s timeout
+      const isChatBot = (meta.source === 'google-chat-bot')
+      if (isChatBot) {
+        console.log('[INBOUND] Fast-ack mode for Google Chat message')
+        // Fire-and-forget processing to keep response time low
+        setImmediate(async () => {
+          try {
+            console.log('[INBOUND] (bg) Processing update via ProjectManager...')
+            const pmResponse = await projectManager.processUpdate(processReq)
+            console.log('[INBOUND] (bg) ProjectManager processed:', {
+              success: pmResponse.success,
+              extractedTasks: pmResponse.extractedTasks.length,
+              assignedProjects: pmResponse.assignedProjects.length
+            })
+          } catch (bgErr) {
+            console.error('[INBOUND] (bg) Processing error:', bgErr)
+          }
+        })
+
+        const chatResponse = chatMessenger.createWebhookResponse(
+          `Thanks, ${senderDisplay}! I’m logging your update now.`
+        )
+        return res.status(200).json({
+          ...chatResponse,
+          _metadata: {
+            ok: true,
+            processed: false,
+            queued: true,
+            messageText,
+            senderEmail,
+            senderDisplay,
+            hasImages,
+            imageCount
+          }
+        })
+      }
+
+      // Non-Chat sources: perform synchronous processing as before
+      console.log('[INBOUND] Processing update via ProjectManager (synchronous)...')
       const pmResponse = await projectManager.processUpdate(processReq)
       console.log('[INBOUND] ProjectManager response:', {
         success: pmResponse.success,
@@ -130,31 +179,43 @@ inboundRouter.post('/webhook', upload.any(), async (req, res) => {
         }
       })
     } else {
-      // Fallback for messages without proper text/sender info
+      // Fallback for messages without proper text/sender info — still reply in Chat format
       console.log('[INBOUND] Using fallback response - missing data:', {
         messageText: messageText,
         senderEmail: senderEmail,
-        reason: !messageText ? 'No messageText' : 'No senderEmail'
+        senderId: senderId,
+        fallbackId: fallbackId,
+        reason: !messageText ? 'No messageText' : 'No identifiers present'
       })
-      
-      return res.status(200).json({ 
-        ok: true, 
-        processed: false,
-        reason: 'Missing messageText or senderEmail',
-        debug: {
-          messageText: messageText,
-          senderEmail: senderEmail,
-          messageTextLength: messageText.length,
-          hasMessageText: !!messageText,
-          hasSenderEmail: !!senderEmail
-        },
-        meta, 
-        files: mapped.map(f => ({ 
-          fieldName: f.fieldName, 
-          originalName: f.originalName, 
-          mimeType: f.mimeType, 
-          size: f.size 
-        })) 
+
+      const chatResponse = chatMessenger.createWebhookResponse(
+        !messageText
+          ? 'I received a message without text. Please send a short update so I can log it.'
+          : 'Update received. Note: your email wasn’t provided by Chat, so I’m using a fallback identity for tracking.'
+      )
+
+      return res.status(200).json({
+        ...chatResponse,
+        _metadata: {
+          ok: true,
+          processed: false,
+          reason: !messageText ? 'No messageText' : 'No identifiers',
+          debug: {
+            messageText: messageText,
+            senderEmail: senderEmail,
+            senderId: senderId,
+            fallbackId: fallbackId,
+            messageTextLength: messageText.length,
+            hasMessageText: !!messageText
+          },
+          meta,
+          files: mapped.map(f => ({
+            fieldName: f.fieldName,
+            originalName: f.originalName,
+            mimeType: f.mimeType,
+            size: f.size
+          }))
+        }
       })
     }
 

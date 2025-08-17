@@ -186,7 +186,131 @@ dashboardRouter.get('/tasks', async (req, res) => {
   }
 });
 
-// Weekly updates endpoint
+// Enhanced messages endpoint with better filtering
+dashboardRouter.get('/messages', async (req, res) => {
+  try {
+    if (!projectManagerInstance) {
+      return res.status(500).json({ error: 'Project manager not initialized' });
+    }
+
+    const { 
+      employeeId, 
+      projectId, 
+      sentiment, 
+      weekOf, 
+      limit = '50', 
+      offset = '0',
+      sortBy = 'date',
+      sortOrder = 'desc'
+    } = req.query;
+
+    const pm = projectManagerInstance as ProjectManager;
+    let updates = pm.getUpdates();
+
+    // Apply filters
+    if (employeeId) {
+      updates = updates.filter(u => u.employeeId === employeeId);
+    }
+    if (projectId) {
+      // Filter by messages that mention this project
+      updates = updates.filter(u => u.projects.includes(projectId as string));
+    }
+    if (sentiment) {
+      updates = updates.filter(u => u.sentiment === sentiment);
+    }
+    if (weekOf) {
+      updates = updates.filter(u => u.weekOf === weekOf);
+    }
+
+    // Enhanced sorting
+    updates.sort((a, b) => {
+      let comparison = 0;
+      switch (sortBy) {
+        case 'date':
+          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          break;
+        case 'employee':
+          comparison = a.employeeId.localeCompare(b.employeeId);
+          break;
+        case 'sentiment':
+          comparison = (a.sentiment || 'neutral').localeCompare(b.sentiment || 'neutral');
+          break;
+        default:
+          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      }
+      return sortOrder === 'desc' ? -comparison : comparison;
+    });
+
+    // Pagination
+    const limitNum = parseInt(limit as string, 10);
+    const offsetNum = parseInt(offset as string, 10);
+    const total = updates.length;
+    const paginatedUpdates = updates.slice(offsetNum, offsetNum + limitNum);
+
+    // Enrich with employee and project info
+    const employees = pm.getEmployees();
+    const projects = pm.getProjects();
+    const tasks = pm.getTasks();
+
+    const enrichedUpdates = paginatedUpdates.map(update => {
+      const employee = employees.find(e => e.id === update.employeeId);
+      const relatedProjects = projects.filter(p => update.projects.includes(p.id));
+      const relatedTasks = tasks.filter(t => 
+        t.employeeId === update.employeeId && 
+        update.projects.includes(t.projectId || '')
+      );
+
+      return {
+        ...update,
+        employee: employee ? {
+          id: employee.id,
+          displayName: employee.displayName,
+          email: employee.email
+        } : null,
+        relatedProjects: relatedProjects.map(p => ({
+          id: p.id,
+          name: p.name,
+          status: p.status,
+          priority: p.priority
+        })),
+        relatedTasks: relatedTasks.map(t => ({
+          id: t.id,
+          title: t.title,
+          status: t.status,
+          priority: t.priority
+        })),
+        // Add relative time for better UX
+        relativeTime: getRelativeTime(update.createdAt)
+      };
+    });
+
+    res.json({
+      messages: enrichedUpdates,
+      pagination: {
+        total,
+        limit: limitNum,
+        offset: offsetNum,
+        hasMore: offsetNum + limitNum < total
+      },
+      filters: {
+        employeeId,
+        projectId,
+        sentiment,
+        weekOf
+      },
+      sorting: {
+        sortBy,
+        sortOrder
+      }
+    });
+
+  } catch (error) {
+    console.error('[DASHBOARD] Error fetching messages:', error);
+    res.status(500).json({ error: 'Failed to fetch messages' });
+  }
+});
+
+// Legacy updates endpoint (kept for backward compatibility)
 dashboardRouter.get('/updates', async (req, res) => {
   try {
     if (!projectManagerInstance) {
@@ -253,6 +377,28 @@ dashboardRouter.get('/analytics', async (req, res) => {
   } catch (error) {
     console.error('[DASHBOARD] Error generating analytics:', error);
     res.status(500).json({ error: 'Failed to generate analytics' });
+  }
+});
+
+// Reset endpoint for testing
+dashboardRouter.post('/reset', async (req, res) => {
+  try {
+    if (!projectManagerInstance) {
+      return res.status(500).json({ error: 'Project manager not initialized' });
+    }
+
+    const pm = projectManagerInstance as ProjectManager;
+    pm.resetAllData();
+
+    res.json({ 
+      success: true, 
+      message: 'All data has been reset',
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('[DASHBOARD] Error resetting data:', error);
+    res.status(500).json({ error: 'Failed to reset data' });
   }
 });
 
@@ -331,4 +477,26 @@ function getNextWeek(weekOf: string): string {
   const date = new Date(weekOf);
   date.setDate(date.getDate() + 7);
   return date.toISOString().slice(0, 10);
+}
+
+function getRelativeTime(dateString: string): string {
+  const now = new Date();
+  const date = new Date(dateString);
+  const diffMs = now.getTime() - date.getTime();
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffSeconds < 60) {
+    return 'just now';
+  } else if (diffMinutes < 60) {
+    return `${diffMinutes}m ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours}h ago`;
+  } else if (diffDays < 7) {
+    return `${diffDays}d ago`;
+  } else {
+    return date.toLocaleDateString();
+  }
 }
